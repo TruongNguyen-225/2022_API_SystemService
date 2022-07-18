@@ -51,7 +51,7 @@ namespace SystemServiceAPI.Controllers
             return await _billBo.Put(req);
         }
 
-        [HttpPost]
+        [HttpDelete]
         [Route("DeleteByID/{billID}")]
         public async Task<object> DeleteByID(int billID)
         {
@@ -65,14 +65,14 @@ namespace SystemServiceAPI.Controllers
             return await _billBo.DeleteMultiRow(req);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("Print/{billID}")]
         public async Task<object> Print(int billID)
         {
             return await _billBo.Print(billID);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("PrintAll")]
         public async Task<object> PrintAll(int serviceID)
         {

@@ -20,9 +20,9 @@ namespace SystemServiceAPI.Entities.Table
         [Required]
         [StringLength(50)]
         public string Code { get; set; }
-        public double Money { get; set; }
-        public double Postage { get; set; }
-        public double Total { get; set; }
+        public int Money { get; set; }
+        public int Postage { get; set; }
+        public int Total { get; set; }
         public int? Status { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime DateTimeAdd { get; set; }

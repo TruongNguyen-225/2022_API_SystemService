@@ -37,7 +37,7 @@ namespace SystemServiceAPI.Controllers
             return await _adminConfig.GetColumns(tableName);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("ExcuteQuery")]
         public async Task<object> ExcuteQuery([FromBody] string cmd)
         {

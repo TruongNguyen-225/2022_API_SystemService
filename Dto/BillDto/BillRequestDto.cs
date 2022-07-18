@@ -9,9 +9,9 @@ namespace SystemServiceAPI.Dto.BillDto
         public int RetailID { get; set; }
         public int BankID { get; set; } = 80;
         public string Code { get; set; } = String.Empty;
-        public double Money { get; set; }
-        public double Postage { get; set; }
-        public double Total { get; set; }
+        public int Money { get; set; }
+        public int Postage { get; set; }
+        public int Total { get; set; }
         public int Status { get; set; } = 1;
         public DateTime DateTimeAdd { get; set; }
         public DateTime DateTimeUpdate { get; set; }
@@ -22,9 +22,9 @@ namespace SystemServiceAPI.Dto.BillDto
         public int ID { get; set; }
         public int RetailID { get; set; }
         public int BankID { get; set; } = 80;
-        public double Money { get; set; }
-        public double Postage { get; set; }
-        public double Total { get; set; }
+        public int Money { get; set; }
+        public int Postage { get; set; }
+        public int Total { get; set; }
     }
 
     public class BillSearchDto
