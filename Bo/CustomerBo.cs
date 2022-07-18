@@ -188,33 +188,26 @@ namespace SystemServiceAPI.Bo
                         }
                     }
 
-                    Customer entity = new Customer()
-                    {
-                        FullName = req.FullName,
-                        Code = req.Code,
-                        Address = customerData.Address,
-                        Hotline = req.Hotline,
-                        IsDelete = customerData.IsDelete,
-                        DateTimeAdd = customerData.DateTimeAdd,
-                        DateTimeUpdate = DateTime.Now,
-                        MonthPrint = customerData.MonthPrint,
-                        YearPrint = customerData.YearPrint,
-                        IsPrint = customerData.IsPrint,
-                        RetailID = req.RetailID,
-                        ServiceID = customerData.ServiceID,
-                        BankID = req.BankID,
-                        VillageID = req.VillageID
-                    };
+                    customerData.FullName = req.FullName;
+                    customerData.Code = req.Code;
+                    customerData.Hotline = req.Hotline;
+                    customerData.RetailID = req.RetailID;
+                    customerData.BankID = req.BankID;
+                    customerData.VillageID = req.VillageID;
 
-                    _dbContext.Update(entity);
+                    _dbContext.Update(customerData);
                     _dbContext.SaveChanges();
 
                     response.Code = (int)HttpStatusCode.OK;
-                    response.Result = null;
+                    response.Result = customerData;
                     response.Msg = "SUCCESS";
 
                     return await Task.FromResult(response);
                 }
+
+                response.Code = (int)HttpStatusCode.NotFound;
+                response.Result = customerData;
+                response.Msg = "NOT FOUND";
             }
             catch (Exception ex)
             {
@@ -237,33 +230,18 @@ namespace SystemServiceAPI.Bo
                 {
                     response.Code = (int)HttpStatusCode.NotFound;
                     response.Result = null;
-                    response.Msg = "FAIL";
+                    response.Msg = "NOT FOUND";
                 }
                 else
                 {
-                    Customer entity = new Customer()
-                    {
-                        FullName = customerData.FullName,
-                        Code = customerData.Code,
-                        Address = customerData.Address,
-                        Hotline = customerData.Hotline,
-                        IsDelete = true,
-                        DateTimeAdd = customerData.DateTimeAdd,
-                        DateTimeUpdate = DateTime.Now,
-                        MonthPrint = customerData.MonthPrint,
-                        YearPrint = customerData.YearPrint,
-                        IsPrint = customerData.IsPrint,
-                        RetailID = customerData.RetailID,
-                        ServiceID = customerData.ServiceID,
-                        BankID = customerData.BankID,
-                        VillageID = customerData.VillageID
-                    };
+                    customerData.IsDelete = true;
+                    customerData.DateTimeUpdate = DateTime.Now;
 
-                    _dbContext.Update(entity);
+                    _dbContext.Update(customerData);
                     _dbContext.SaveChanges();
 
                     response.Code = (int)HttpStatusCode.OK;
-                    response.Result = null;
+                    response.Result = customerData;
                     response.Msg = "SUCCESS";
                 }
             }
@@ -306,14 +284,9 @@ namespace SystemServiceAPI.Bo
                     _dbContext.SaveChanges(true);
 
                     response.Code = (int)HttpStatusCode.OK;
-                    response.Result = null;
+                    response.Result = customers;
                     response.Msg = "SUCCESS";
                 }
-
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
-                response.Msg = "SUCCESS";
             }
             catch (Exception ex)
             {

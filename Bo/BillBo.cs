@@ -126,30 +126,24 @@ namespace SystemServiceAPI.Bo
 
                 if(billData != null)
                 {
-                    MonthlyTransaction entity = new MonthlyTransaction()
-                    {
-                        CustomerID = billData.CustomerID,
-                        ServiceID = billData.ServiceID,
-                        RetailID = req.RetailID,
-                        BankID = req.BankID,
-                        Code = billData.Code,
-                        Money = req.Money,
-                        Postage = req.Postage,
-                        Total = req.Total,
-                        Status = billData.Status,
-                        DateTimeAdd = billData.DateTimeAdd,
-                        DateTimeUpdate = DateTime.Now
-                    };
+                    billData.Money = req.Money;
+                    billData.Postage = req.Postage;
+                    billData.Total = req.Total;
+                    billData.DateTimeUpdate = DateTime.Now;
 
-                    _dbContext.Update(entity);
+                    _dbContext.Update(billData);
                     _dbContext.SaveChanges();
 
                     response.Code = (int)HttpStatusCode.OK;
-                    response.Result = null;
+                    response.Result = billData;
                     response.Msg = "SUCCESS";
 
                     return await Task.FromResult(response);
                 }
+
+                response.Code = (int)HttpStatusCode.NotFound;
+                response.Result = null;
+                response.Msg = "NOT FOUND";
             }
             catch (Exception ex)
             {
@@ -211,7 +205,7 @@ namespace SystemServiceAPI.Bo
                 {
                     response.Code = (int)HttpStatusCode.NotFound;
                     response.Result = null;
-                    response.Msg = "FAIL";
+                    response.Msg = "NOT FOUND";
                 }
                 else
                 {
@@ -222,11 +216,6 @@ namespace SystemServiceAPI.Bo
                     response.Result = null;
                     response.Msg = "SUCCESS";
                 }
-                
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
-                response.Msg = "SUCCESS";
             }
             catch (Exception ex)
             {
