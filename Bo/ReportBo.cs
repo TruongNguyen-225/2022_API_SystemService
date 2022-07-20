@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.Report;
+using SystemServiceAPI.Entities.View;
 using SystemServiceAPI.Helpers;
 
 namespace SystemServiceAPI.Bo
@@ -22,12 +24,26 @@ namespace SystemServiceAPI.Bo
             ResponseResults response = new ResponseResults();
             try
             {
-                var data = _dbContext.vw_MonthlyTransactions.Where(
+                List<vw_MonthlyTransaction> data = new List<vw_MonthlyTransaction>();
+
+                if(req.ServiceID > 6)
+                {
+                    data = _dbContext.vw_MonthlyTransactions.Where(
+                        x => x.RetailID == req.RetailID &&
+                        x.DateTimeAdd >= req.StartTime &&
+                        x.DateTimeAdd <= req.EndTime
+                    ).OrderBy(x => x.ServiceID).OrderBy(x => x.DateTimeAdd).ToList();
+                }
+                else
+                {
+                    data = _dbContext.vw_MonthlyTransactions.Where(
                         x => x.ServiceID == req.ServiceID &&
                         x.RetailID == req.RetailID &&
                         x.DateTimeAdd >= req.StartTime &&
                         x.DateTimeAdd <= req.EndTime
-                    ).ToList();
+                    ).OrderBy(x => x.ServiceID).OrderBy(x => x.DateTimeAdd).ToList();
+                }
+                
 
                 if(data.Count > 0)
                 {

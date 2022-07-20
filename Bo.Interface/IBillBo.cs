@@ -17,7 +17,7 @@ namespace SystemServiceAPI.Bo.Interface
         //Task<ResponseResults> FindByCondition(BillSearchDto req);
         Task<ResponseResults> Import(int monthPrev); //chỉ dành cho tiền điện
         Task<ResponseResults> Print(int billID);
-        Task<ResponseResults> PrintAll(int serviceID);
+        Task<ResponseResults> PrintMultiRow(BillPrintAllDto req);
     }
 }
 

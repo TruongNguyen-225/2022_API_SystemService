@@ -141,11 +141,24 @@ namespace SystemServiceAPI.Bo
 
                 }
 
-                _dbContext.Add(req);
+                Customer c = new Customer();
+                c.RetailID = req.RetailID;
+                c.ServiceID = req.ServiceID;
+                c.BankID = req.BankID;
+                c.FullName = req.FullName;
+                c.Code = req.Code;
+                c.Address = req.Address;
+                c.Hotline = req.Hotline;
+                c.IsDelete = req.IsDelete;
+                c.VillageID = req.VillageID;
+                c.DateTimeAdd = req.DateTimeAdd;
+                c.DateTimeUpdate = null;
+
+                _dbContext.Add(c);
                 _dbContext.SaveChanges();
 
                 response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
+                response.Result = c;
                 response.Msg = "SUCCESS";
 
             }
@@ -194,6 +207,7 @@ namespace SystemServiceAPI.Bo
                     customerData.RetailID = req.RetailID;
                     customerData.BankID = req.BankID;
                     customerData.VillageID = req.VillageID;
+                    customerData.DateTimeUpdate = DateTime.Now;
 
                     _dbContext.Update(customerData);
                     _dbContext.SaveChanges();
@@ -275,12 +289,12 @@ namespace SystemServiceAPI.Bo
                 }
                 else
                 {
-                    foreach (var item in customers)
+                    foreach (Customer item in customers)
                     {
                         item.IsDelete = true;
+                        _dbContext.Update(item);
                     }
 
-                    _dbContext.Update(customers);
                     _dbContext.SaveChanges(true);
 
                     response.Code = (int)HttpStatusCode.OK;

@@ -96,11 +96,24 @@ namespace SystemServiceAPI.Bo
                     }
                 }
 
-                _dbContext.Add(req);
+                MonthlyTransaction m = new MonthlyTransaction();
+                m.CustomerID = req.CustomerID;
+                m.ServiceID = req.ServiceID;
+                m.RetailID = req.RetailID;
+                m.BankID = req.BankID;
+                m.Code = req.Code;
+                m.Money = req.Money;
+                m.Postage = req.Postage;
+                m.Total = req.Total;
+                m.Status = req.Status;
+                m.DateTimeAdd = DateTime.Now;
+                m.DateTimeUpdate = null;
+
+                _dbContext.Add(m);
                 _dbContext.SaveChanges();
 
                 response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
+                response.Result = m;
                 response.Msg = "SUCCESS";
             }
             catch (Exception ex)
@@ -170,7 +183,7 @@ namespace SystemServiceAPI.Bo
                 }
                 else
                 {
-                    _dbContext.Remove(billID);
+                    _dbContext.Remove(data);
                     _dbContext.SaveChanges();
 
                     response.Code = (int)HttpStatusCode.OK;
@@ -191,7 +204,7 @@ namespace SystemServiceAPI.Bo
         public async Task<ResponseResults> DeleteMultiRow(BillDeleteDto req)
         {
             ResponseResults response = new ResponseResults();
-            List<string> listID = req.listBillID.Split(';').ToList();
+            List<string> listID = req.ListBillID.Split(';').ToList();
             try
             {
                 var billData = _dbContext.MonthlyTransactions.Where(
@@ -209,7 +222,11 @@ namespace SystemServiceAPI.Bo
                 }
                 else
                 {
-                    _dbContext.Remove(billData);
+                    foreach(MonthlyTransaction item in billData)
+                    {
+                        _dbContext.Remove(item);
+                    }
+
                     _dbContext.SaveChanges(true);
 
                     response.Code = (int)HttpStatusCode.OK;
@@ -267,24 +284,31 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> PrintAll(int serviceID)
+        public async Task<ResponseResults> PrintMultiRow(BillPrintAllDto req)
         {
             ResponseResults response = new ResponseResults();
 
+            List<string> listID = req.ListBillID.Split(';').ToList();
             try
             {
-                var dataBill = await _dbContext.MonthlyTransactions.Where(x => x.ServiceID == serviceID).ToListAsync();
-                if (dataBill != null)
-                {
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = dataBill;
-                    response.Msg = "SUCCESS";
-                }
-                else
+                var billData = _dbContext.MonthlyTransactions.Where(
+                        x => x.ServiceID == req.ServiceID &&
+                        listID.Contains(x.ID.ToString()) &&
+                        x.DateTimeAdd.Month == req.Month &&
+                        x.DateTimeAdd.Year == req.Year
+                    );
+
+                if (billData == null)
                 {
                     response.Code = (int)HttpStatusCode.NotFound;
                     response.Result = null;
                     response.Msg = "NOT FOUND";
+                }
+                else
+                {
+                    response.Code = (int)HttpStatusCode.OK;
+                    response.Result = billData;
+                    response.Msg = "SUCCESS";
                 }
             }
             catch (Exception ex)

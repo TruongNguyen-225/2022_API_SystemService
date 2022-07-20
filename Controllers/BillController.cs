@@ -72,11 +72,11 @@ namespace SystemServiceAPI.Controllers
             return await _billBo.Print(billID);
         }
 
-        [HttpGet]
-        [Route("PrintAll")]
-        public async Task<object> PrintAll(int serviceID)
+        [HttpPost]
+        [Route("PrintMultiRow")]
+        public async Task<object> PrintMultiRow(BillPrintAllDto req)
         {
-            return await _billBo.PrintAll(serviceID);
+            return await _billBo.PrintMultiRow(req);
         }
     }
 }

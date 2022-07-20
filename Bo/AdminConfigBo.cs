@@ -97,12 +97,10 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<object> ExcuteQuery(string cmd)
+        public async Task<object> ExcuteQuery(string query)
         {
-            DataTable data = new DataTable();
             string key = _configuration.GetValue<String>("Encrypt:Key");
-            //string enscrypt = Utility.EncryptString("select * from aaaaaaaa", key);
-            //string descrypt = Utility.DecryptString(enscrypt, key);
+            //string query = Utility.DecryptString(cmd, key);
             string connectStr = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
             ResponseResults response = new ResponseResults();
             List<object> results = new List<object>();
@@ -110,9 +108,10 @@ namespace SystemServiceAPI.Bo
             try
             {
 
-                if (cmd.IndexOf("SELECT") > -1 || cmd.ToLower().Contains("select"))
+                if (query.ToLower().Contains("select"))
                 {
-                    data = SqlHelper.GetDataReturnDataTable(connectStr, cmd);
+                    DataTable data = new DataTable();
+                    data = SqlHelper.GetDataReturnDataTable(connectStr, query);
                     if (data != null && data.Rows != null && data.Rows.Count > 0)
                     {
                         response.Result = Utility.DataTableToJSONWithStringBuilder(data);
@@ -124,7 +123,7 @@ namespace SystemServiceAPI.Bo
                 }
                 else
                 {
-                    bool result = SqlHelper.ExcuteNonQuerySQL(cmd, connectStr);
+                    bool result = SqlHelper.ExcuteNonQuerySQL(query, connectStr);
                     response.Result = result;
                 }
 

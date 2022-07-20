@@ -28,7 +28,7 @@ namespace SystemServiceAPI.Bo
                 int currentRecive = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Total).Sum();
                 int currentProfit = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Postage).Sum();
                 int totalBudget = _dbContext.vw_MonthlyTransactions.Select(X => X.Postage).Sum();
-                int countMonthDone = _dbContext.vw_MonthlyTransactions.GroupBy(x => x.DateTimeAdd).Count();
+                int countMonthDone = _dbContext.vw_MonthlyTransactions.GroupBy(x => x.Month).Select(x=>x.Key).Count();
 
                 Dictionary<string, int> result = new Dictionary<string, int>();
                 result.Add("CountTransaction", countTransaction);
