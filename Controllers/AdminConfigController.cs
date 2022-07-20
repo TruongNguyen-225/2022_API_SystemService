@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BillDto;
+using SystemServiceAPICore3.Dto.AdminConfigDto;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -39,9 +41,9 @@ namespace SystemServiceAPI.Controllers
 
         [HttpPost]
         [Route("ExcuteQuery")]
-        public async Task<object> ExcuteQuery([FromBody] string cmd)
+        public async Task<object> ExcuteQuery([FromBody] AdminConfigDto req)
         {
-            return await _adminConfig.ExcuteQuery(cmd);
+            return await _adminConfig.ExcuteQuery(req.query);
         }
     }
 }

@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using SystemServiceAPICore3.Utilities;
+using System.Reflection;
+using System.Linq;
 
 namespace SystemServiceAPI.Bo
 {
@@ -20,7 +23,7 @@ namespace SystemServiceAPI.Bo
             _configuration = configuration;
             _context = context;
         }
-        
+
         public async Task<object> GetAllTable()
         {
             string connectStr = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
@@ -40,10 +43,7 @@ namespace SystemServiceAPI.Bo
                 data = SqlHelper.GetDataReturnDataTable(connectStr, cmd);
                 if (data != null && data.Rows != null && data.Rows.Count > 0)
                 {
-                    var stringJson = JsonConvert.SerializeObject(data);
-                    results = JsonConvert.DeserializeObject<List<object>>(stringJson);
-
-                    response.Result = results;
+                    response.Result = Utility.DataTableToJSONWithStringBuilder(data);
                 }
                 else
                 {
@@ -77,10 +77,7 @@ namespace SystemServiceAPI.Bo
                 data = SqlHelper.GetDataReturnDataTable(connectStr, cmd);
                 if (data != null && data.Rows != null && data.Rows.Count > 0)
                 {
-                    var stringJson = JsonConvert.SerializeObject(data);
-                    results = JsonConvert.DeserializeObject<List<object>>(stringJson);
-
-                    response.Result = results;
+                    response.Result = Utility.DataTableToJSONWithStringBuilder(data);
                 }
                 else
                 {
@@ -102,23 +99,23 @@ namespace SystemServiceAPI.Bo
 
         public async Task<object> ExcuteQuery(string cmd)
         {
+            DataTable data = new DataTable();
+            string key = _configuration.GetValue<String>("Encrypt:Key");
+            //string enscrypt = Utility.EncryptString("select * from aaaaaaaa", key);
+            //string descrypt = Utility.DecryptString(enscrypt, key);
             string connectStr = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
             ResponseResults response = new ResponseResults();
             List<object> results = new List<object>();
 
             try
             {
-                DataTable data = new DataTable();
 
                 if (cmd.IndexOf("SELECT") > -1 || cmd.ToLower().Contains("select"))
                 {
                     data = SqlHelper.GetDataReturnDataTable(connectStr, cmd);
                     if (data != null && data.Rows != null && data.Rows.Count > 0)
                     {
-                        var stringJson = JsonConvert.SerializeObject(data);
-                        results = JsonConvert.DeserializeObject<List<object>>(stringJson);
-
-                        response.Result = results;
+                        response.Result = Utility.DataTableToJSONWithStringBuilder(data);
                     }
                     else
                     {
@@ -134,7 +131,7 @@ namespace SystemServiceAPI.Bo
                 response.Code = (int)HttpStatusCode.OK;
                 response.Msg = "SUCCESS";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Code = (int)HttpStatusCode.InternalServerError;
                 response.Msg = "ERROR:\n" + ex.Message;

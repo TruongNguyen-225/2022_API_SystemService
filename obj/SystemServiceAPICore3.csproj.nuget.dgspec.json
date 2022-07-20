@@ -1,24 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\2.Source\\8.Folder SourceCode\\SystemServiceAPICore3\\SystemServiceAPICore3.csproj": {}
+    "C:\\PROJECT\\SS\\2022_API_SystemService\\SystemServiceAPICore3.csproj": {}
   },
   "projects": {
-    "D:\\2.Source\\8.Folder SourceCode\\SystemServiceAPICore3\\SystemServiceAPICore3.csproj": {
+    "C:\\PROJECT\\SS\\2022_API_SystemService\\SystemServiceAPICore3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\2.Source\\8.Folder SourceCode\\SystemServiceAPICore3\\SystemServiceAPICore3.csproj",
+        "projectUniqueName": "C:\\PROJECT\\SS\\2022_API_SystemService\\SystemServiceAPICore3.csproj",
         "projectName": "SystemServiceAPICore3",
-        "projectPath": "D:\\2.Source\\8.Folder SourceCode\\SystemServiceAPICore3\\SystemServiceAPICore3.csproj",
-        "packagesPath": "C:\\Users\\Truong Nguyen\\.nuget\\packages\\",
-        "outputPath": "D:\\2.Source\\8.Folder SourceCode\\SystemServiceAPICore3\\obj\\",
+        "projectPath": "C:\\PROJECT\\SS\\2022_API_SystemService\\SystemServiceAPICore3.csproj",
+        "packagesPath": "C:\\Users\\TruongNV75\\.nuget\\packages\\",
+        "outputPath": "C:\\PROJECT\\SS\\2022_API_SystemService\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Truong Nguyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 19.2.config",
+          "C:\\Users\\TruongNV75\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +25,6 @@
           "netcoreapp3.1"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\DevExpress 19.2\\Components\\System\\Components\\Packages": {},
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -75,12 +73,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[3.1.23, 3.1.23]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -89,7 +81,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
         }
       }
     }
