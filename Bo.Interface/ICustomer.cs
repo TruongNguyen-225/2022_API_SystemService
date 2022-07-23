@@ -7,6 +7,7 @@ namespace SystemServiceAPI.Bo.Interface
     public interface ICustomer
     {
         Task<ResponseResults> GetCustomerByID(int customerID);
+        Task<ResponseResults> GetCustomerByServiceID(int serviceID);
         Task<ResponseResults> GetByCondition(CustomerRequestDto req);
         Task<ResponseResults> Post(AddCustomerDto req);
         Task<ResponseResults> Put(UpdateCustomerDto req);

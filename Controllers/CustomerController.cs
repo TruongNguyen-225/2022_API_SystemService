@@ -17,6 +17,7 @@ namespace SystemServiceAPI.Controllers
         {
             _customerBo = customerBo;
         }
+
         /// <summary>
         /// Get information customer by CustomerID
         /// </summary>
@@ -27,6 +28,18 @@ namespace SystemServiceAPI.Controllers
         public async Task<object> GetCustomerByID(int customerID)
         {
             return await _customerBo.GetCustomerByID(customerID);
+        }
+
+        /// <summary>
+        /// Get information customer by ServiceID
+        /// </summary>
+        /// <param name="customerID"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetCustomerByServiceID/{serviceID}")]
+        public async Task<object> GetCustomerByServiceID(int serviceID)
+        {
+            return await _customerBo.GetCustomerByServiceID(serviceID);
         }
 
         /// <summary>

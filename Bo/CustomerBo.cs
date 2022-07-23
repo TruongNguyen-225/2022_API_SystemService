@@ -50,6 +50,36 @@ namespace SystemServiceAPI.Bo
 
             return await Task.FromResult(response);
         }
+        
+        public async Task<ResponseResults> GetCustomerByServiceID(int serviceID)
+        {
+            ResponseResults response = new ResponseResults();
+            try
+            {
+                var data = await _dbContext.vw_Customers.Where(x => x.ServiceID == serviceID && x.IsDelete == false).FirstOrDefaultAsync();
+                if (data != null)
+                {
+                    response.Code = (int)HttpStatusCode.OK;
+                    response.Result = data;
+                    response.Msg = "SUCCESS";
+                }
+                else
+                {
+                    response.Code = (int)HttpStatusCode.NotFound;
+                    response.Result = null;
+                    response.Msg = "NOT FOUND";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Code = (int)HttpStatusCode.InternalServerError;
+                response.Result = null;
+                response.Msg = ex.Message;
+            }
+
+            return await Task.FromResult(response);
+        }
 
         public async Task<ResponseResults> GetByCondition(CustomerRequestDto req)
         {
