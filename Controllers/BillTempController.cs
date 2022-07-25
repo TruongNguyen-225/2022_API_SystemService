@@ -67,9 +67,9 @@ namespace SystemServiceAPI.Controllers
 
         [HttpPost]
         [Route("Import")]
-        public async Task<object> Import()
+        public async Task<object> Import([FromBody] int month)
         {
-            return await _billBo.Import();
+            return await _billBo.Import(month);
         }
     }
 }

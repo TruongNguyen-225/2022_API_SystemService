@@ -220,7 +220,7 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> Import()
+        public async Task<ResponseResults> Import(int month)
         {
             ResponseResults response = new ResponseResults();
 
@@ -235,7 +235,7 @@ namespace SystemServiceAPI.Bo
             }
 
             var data = _dbContext.MonthlyTransactions
-                .Where(x => x.ServiceID == 1 && x.DateTimeAdd.Month == DateTime.Now.Month - 1 && x.DateTimeAdd.Year == DateTime.Now.Year)
+                .Where(x => x.ServiceID == 1 && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == DateTime.Now.Year)
                 .ToList();
 
             if(data.Count > 0)

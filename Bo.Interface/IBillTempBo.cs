@@ -13,7 +13,7 @@ namespace SystemServiceAPI.Bo.Interface
         Task<ResponseResults> Put(BillUpdatetDto req);
         Task<ResponseResults> DeleteByID(int billID);
         Task<ResponseResults> DeleteMultiRow(BillDeleteDto req);
-        Task<ResponseResults> Import();
+        Task<ResponseResults> Import(int month);
         Task<ResponseResults> PrintMultiRow(BillPrintAllDto req);
     }
 }
