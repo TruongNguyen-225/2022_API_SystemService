@@ -56,7 +56,7 @@ namespace SystemServiceAPI.Bo
             ResponseResults response = new ResponseResults();
             try
             {
-                var data = await _dbContext.vw_Customers.Where(x => x.ServiceID == serviceID && x.IsDelete == false).FirstOrDefaultAsync();
+                var data = await _dbContext.vw_Customers.Where(x => x.ServiceID == serviceID && x.IsDelete == false).ToListAsync();
                 if (data != null)
                 {
                     response.Code = (int)HttpStatusCode.OK;

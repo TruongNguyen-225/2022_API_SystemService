@@ -291,14 +291,14 @@ namespace SystemServiceAPI.Bo
             List<string> listID = req.ListBillID.Split(';').ToList();
             try
             {
-                var billData = _dbContext.MonthlyTransactions.Where(
+                var billData = await _dbContext.MonthlyTransactions.Where(
                         x => x.ServiceID == req.ServiceID &&
                         listID.Contains(x.ID.ToString()) &&
                         x.DateTimeAdd.Month == req.Month &&
                         x.DateTimeAdd.Year == req.Year
-                    );
+                    ).ToListAsync();
 
-                if (billData == null)
+                if (billData.Count < 1)
                 {
                     response.Code = (int)HttpStatusCode.NotFound;
                     response.Result = null;
