@@ -38,6 +38,7 @@ namespace SystemServiceAPI.Dto.BillDto
         public int ServiceID { get; set; }
         public int Month { get; set; }
     }
+
     public class BillDeleteDto
     {
         public int ServiceID { get; set; }

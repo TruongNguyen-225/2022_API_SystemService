@@ -30,6 +30,7 @@ namespace SystemServiceAPI.Helpers
         //public virtual DbSet<Income> Incomes { get; set; } = null!;
         //public virtual DbSet<MoneyTransfer> MoneyTransfers { get; set; } = null!;
         public virtual DbSet<MonthlyTransaction> MonthlyTransactions { get; set; } = null!;
+        public virtual DbSet<MonthlyTransactionTemp> MonthlyTransactionTemp { get; set; } = null!;
         //public virtual DbSet<Option> Options { get; set; } = null!;
         public virtual DbSet<Retail> Retails { get; set; } = null!;
         public virtual DbSet<Service> Services { get; set; } = null!;
@@ -51,6 +52,7 @@ namespace SystemServiceAPI.Helpers
         //public virtual DbSet<vw_MoneyRenewal> vw_MoneyRenewals { get; set; } = null!;
         //public virtual DbSet<vw_MoneyTransfer> vw_MoneyTransfers { get; set; } = null!;
         public virtual DbSet<vw_MonthlyTransaction> vw_MonthlyTransactions { get; set; } = null!;
+        public virtual DbSet<vw_MonthlyTransactionTemp> vw_MonthlyTransactionTemp { get; set; } = null!;
         public virtual DbSet<vw_PieChart> vw_PieCharts { get; set; } = null!;
         public virtual DbSet<vw_PieChartService> vw_PieChartServices { get; set; } = null!;
         //public virtual DbSet<vw_Withdrawal> vw_Withdrawals { get; set; } = null!;
@@ -60,6 +62,12 @@ namespace SystemServiceAPI.Helpers
             modelBuilder.Entity<vw_MonthlyTransaction>(entity =>
             {
                 entity.ToView("vw_MonthlyTransaction");
+                entity.HasNoKey();
+            });
+
+            modelBuilder.Entity<vw_MonthlyTransactionTemp>(entity =>
+            {
+                entity.ToView("vw_MonthlyTransactionTemp");
                 entity.HasNoKey();
             });
 
