@@ -56,7 +56,10 @@ namespace SystemServiceAPI.Bo
             ResponseResults response = new ResponseResults();
             try
             {
-                var data = await _dbContext.vw_Customers.Where(x => x.ServiceID == serviceID && x.IsDelete == false).ToListAsync();
+                var data = await _dbContext.vw_Customers
+                    .Where(x => x.ServiceID == serviceID && x.IsDelete == false)
+                    .OrderByDescending(x => x.DateTimeAdd)
+                    .ToListAsync();
                 if (data != null)
                 {
                     response.Code = (int)HttpStatusCode.OK;
@@ -91,17 +94,26 @@ namespace SystemServiceAPI.Bo
 
                 if (req.RetailID.HasValue && req.ServiceID.HasValue)
                 {
-                    data = await _dbContext.vw_Customers.Where(x => x.ServiceID == req.ServiceID && x.RetailID == req.RetailID && x.IsDelete == false).ToListAsync();
+                    data = await _dbContext.vw_Customers
+                        .Where(x => x.ServiceID == req.ServiceID && x.RetailID == req.RetailID && x.IsDelete == false)
+                        .OrderByDescending(x => x.DateTimeAdd)
+                        .ToListAsync();
                 }
                 else
                 {
                     if (req.RetailID.HasValue && !req.ServiceID.HasValue)
                     {
-                        data = await _dbContext.vw_Customers.Where(x => x.RetailID == req.RetailID).ToListAsync();
+                        data = await _dbContext.vw_Customers
+                            .Where(x => x.RetailID == req.RetailID)
+                            .OrderByDescending(x => x.DateTimeAdd)
+                            .ToListAsync();
                     }
                     else
                     {
-                        data = await _dbContext.vw_Customers.Where(x => x.ServiceID == req.ServiceID).ToListAsync();
+                        data = await _dbContext.vw_Customers
+                            .Where(x => x.ServiceID == req.ServiceID)
+                            .OrderByDescending(x => x.DateTimeAdd)
+                            .ToListAsync();
                     }
                 }
 

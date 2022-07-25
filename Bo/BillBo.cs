@@ -30,7 +30,7 @@ namespace SystemServiceAPI.Bo
                    x => x.ServiceID == serviceID &&
                    x.Month == DateTime.Now.Month &&
                    x.Year == DateTime.Now.Year
-               ).ToListAsync();
+               ).OrderByDescending(x => x.DateTimeAdd).ToListAsync();
 
                 response.Code = (int)HttpStatusCode.OK;
                 response.Result = data;
