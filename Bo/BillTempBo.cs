@@ -234,7 +234,7 @@ namespace SystemServiceAPI.Bo
                 _dbContext.SaveChanges();
             }
 
-            var data = _dbContext.MonthlyTransactions
+            var data = _dbContext.vw_MonthlyTransactions
                 .Where(x => x.ServiceID == 1 && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == DateTime.Now.Year)
                 .ToList();
 
@@ -253,7 +253,7 @@ namespace SystemServiceAPI.Bo
                         m.Money = 0;
                         m.Postage = 0;
                         m.Total = 0;
-                        m.Status = req.Status;
+                        m.Status = 1;
                         m.DateTimeAdd = DateTime.Now;
                         m.DateTimeUpdate = null;
 
