@@ -66,8 +66,8 @@ namespace SystemServiceAPI.Controllers
         }
 
         [HttpPost]
-        [Route("Import")]
-        public async Task<object> Import([FromBody] int month)
+        [Route("Import/{month}")]
+        public async Task<object> Import(int month)
         {
             return await _billBo.Import(month);
         }

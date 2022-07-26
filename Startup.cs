@@ -39,6 +39,7 @@ namespace SystemServiceAPICore3
             services.AddScoped<IReport, ReportBo>();
             services.AddScoped<IDashboard, DashboardBo>();
             services.AddScoped<IAdminConfig, AdminConfigBo>();
+            services.AddScoped<IBillTempBo, BillTempBo>();
 
             services.AddDbContext<AppDbContext>(options =>
                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))

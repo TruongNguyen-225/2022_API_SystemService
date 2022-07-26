@@ -66,7 +66,7 @@ namespace SystemServiceAPI.Bo
                     {
                         response.Code = (int)HttpStatusCode.InternalServerError;
                         response.Result = null;
-                        response.Msg = "Mã số tiền điện " +req.Code + " đã ton tai";
+                        response.Msg = "Mã số tiền điện " +req.Code + " da ton tai";
 
                         return await Task.FromResult(response);
                     }
@@ -250,9 +250,9 @@ namespace SystemServiceAPI.Bo
                         m.RetailID = req.RetailID;
                         m.BankID = req.BankID;
                         m.Code = req.Code;
-                        m.Money = req.Money;
-                        m.Postage = req.Postage;
-                        m.Total = req.Total;
+                        m.Money = 0;
+                        m.Postage = 0;
+                        m.Total = 0;
                         m.Status = req.Status;
                         m.DateTimeAdd = DateTime.Now;
                         m.DateTimeUpdate = null;
