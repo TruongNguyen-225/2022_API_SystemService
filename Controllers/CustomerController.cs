@@ -83,7 +83,7 @@ namespace SystemServiceAPI.Controllers
         /// </summary>
         /// <param name="customerID"></param>
         /// <returns></returns>
-        [HttpDelete]
+        [HttpPost]
         [Route("DeleteByID/{customerID}")]
         public async Task<object> DeleteByID(int customerID)
         {

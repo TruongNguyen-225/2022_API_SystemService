@@ -16,7 +16,7 @@ namespace SystemServiceAPI.Bo.Interface
         Task<ResponseResults> DeleteMultiRow(BillDeleteDto req);
         //Task<ResponseResults> FindByCondition(BillSearchDto req);
         Task<ResponseResults> Import(int monthPrev); //chỉ dành cho tiền điện
-        Task<ResponseResults> Print(int billID);
+        Task<byte[]> Print(int billID);
         Task<ResponseResults> PrintMultiRow(BillPrintAllDto req);
     }
 }

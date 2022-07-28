@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Packaging;
 using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BaseResult;
@@ -10,6 +12,7 @@ using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
 using SystemServiceAPI.Helpers;
+using SystemServiceAPICore3.Utilities;
 
 namespace SystemServiceAPI.Bo
 {
@@ -254,34 +257,24 @@ namespace SystemServiceAPI.Bo
             return null;
         }
 
-        public async Task<ResponseResults> Print(int billID)
+        public async Task<byte[]> Print(int billID)
         {
-            ResponseResults response = new ResponseResults();
-
             try
             {
-                var dataBill = await _dbContext.MonthlyTransactions.Where(x => x.ID == billID).FirstOrDefaultAsync();
+                List<vw_MonthlyTransaction> dataBill = await _dbContext.vw_MonthlyTransactions.Where(x => x.ID == billID).ToListAsync();
                 if(dataBill != null)
                 {
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = dataBill;
-                    response.Msg = "SUCCESS";
-                }
-                else
-                {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
+                    DataTable table = Utility.ToDataTable(dataBill);
+                    byte[] byteArray = ExcelUtility.CreateAndWriteBillExcel(table);
+
+                    return byteArray;
                 }
             }
             catch(Exception ex)
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
             }
 
-            return await Task.FromResult(response);
+            return null;
         }
 
         public async Task<ResponseResults> PrintMultiRow(BillPrintAllDto req)

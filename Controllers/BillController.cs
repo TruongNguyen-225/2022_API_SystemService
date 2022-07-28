@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -51,7 +56,7 @@ namespace SystemServiceAPI.Controllers
             return await _billBo.Put(req);
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Route("DeleteByID/{billID}")]
         public async Task<object> DeleteByID(int billID)
         {
@@ -67,9 +72,16 @@ namespace SystemServiceAPI.Controllers
 
         [HttpGet]
         [Route("Print/{billID}")]
-        public async Task<object> Print(int billID)
+        public async Task<FileResult> Print(int billID)
         {
-            return await _billBo.Print(billID);
+            byte[] res = await _billBo.Print(billID);
+            if(res != null)
+            {
+                return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+            }
+
+            return null;
+            //return await _billBo.Print(billID);
         }
 
         [HttpPost]
