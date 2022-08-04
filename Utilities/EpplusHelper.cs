@@ -8,7 +8,7 @@ namespace SystemServiceAPICore3.Utilities
 {
     public class EpplusHelper
     {
-        public byte[] ExportExcel(string pathTemplate, int rowStart, int colStart, int maxCol, string textMarker, DataTable dataTable)
+        public static byte[] ExportExcel(string pathTemplate, int rowStart, int colStart, int maxCol, string textMarker, DataTable dataTable)
         {
             
 

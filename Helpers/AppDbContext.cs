@@ -26,7 +26,7 @@ namespace SystemServiceAPI.Helpers
         //public virtual DbSet<CostManage_TransactionOfMonth> CostManage_TransactionOfMonths { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         //public virtual DbSet<ElectricityBill> ElectricityBills { get; set; } = null!;
-        //public virtual DbSet<HistoryExportDatum> HistoryExportData { get; set; } = null!;
+        public virtual DbSet<HistoryExportData> HistoryExportData { get; set; } = null!;
         //public virtual DbSet<Income> Incomes { get; set; } = null!;
         //public virtual DbSet<MoneyTransfer> MoneyTransfers { get; set; } = null!;
         public virtual DbSet<MonthlyTransaction> MonthlyTransactions { get; set; } = null!;

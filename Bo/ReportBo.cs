@@ -9,6 +9,7 @@ using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.Report;
 using SystemServiceAPI.Entities.View;
 using SystemServiceAPI.Helpers;
+using SystemServiceAPICore3.Utilities;
 
 namespace SystemServiceAPI.Bo
 {
@@ -70,14 +71,39 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<byte[]> Export(ExportDto req)
+        public async Task<ResponseResults> HistoryReport()
+        {
+            ResponseResults response = new ResponseResults();
+            try
+            {
+                var data = _dbContext.HistoryExportData.ToList();
+
+                if (data.Count > 0)
+                {
+                    response.Code = (int)HttpStatusCode.OK;
+                    response.Result = data;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Code = (int)HttpStatusCode.InternalServerError;
+                response.Result = null;
+                response.Msg = ex.Message;
+            }
+
+            return await Task.FromResult(response);
+        }
+
+        public byte[] Export(ExportDto req)
         {
             DataTable dataTable = new DataTable();
             List<string> listID = req.listID.Split(';').ToList();
 
             var data = _dbContext.vw_MonthlyTransactions.Where(x => listID.Contains(x.ID.ToString()) && x.RetailID == req.retailID).ToList();
+            dataTable = Utility.ToDataTable(data);
+            string pathTemplate = @"C:\DOCUMENTS\TemplateExportDataReport.xlsx";
 
-            //TODO
+            return EpplusHelper.ExportExcel(pathTemplate, 8, 1, 11, "%", dataTable);
         }
     }
 }

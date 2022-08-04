@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SystemServiceAPI.Entities.Table
 {
-    public partial class HistoryExportDatum
+    public partial class HistoryExportData
     {
         [Key]
         public int HistoryID { get; set; }

@@ -32,16 +32,15 @@ namespace SystemServiceAPI.Controllers
 
         [HttpPost]
         [Route("Export")]
-        public async Task<FileResult> Print([FromBody] ExportDto req)
+        public FileResult Export([FromBody] ExportDto req)
         {
-            byte[] res = await _reportBo.Export(req);
+            byte[] res = _reportBo.Export(req);
             if (res != null)
             {
                 return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
             }
 
             return null;
-            //return await _billBo.Print(billID);
-        }
+        } 
     }
 }

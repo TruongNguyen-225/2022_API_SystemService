@@ -58,7 +58,7 @@ namespace SystemServiceAPI.Bo
 
             try
             {
-                var data = _dbContext.vw_DataBarCharts.OrderByDescending(x => x.Year).OrderByDescending(x => x.Month).Take(take); 
+                var data = _dbContext.vw_DataBarCharts.OrderByDescending(x => x.Year).ThenByDescending(x => x.Month).Take(take);
 
                 response.Code = (int)HttpStatusCode.OK;
                 response.Result = data;
