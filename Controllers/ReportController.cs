@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.Report;
@@ -27,6 +28,20 @@ namespace SystemServiceAPI.Controllers
         public async Task<object> GetByCondition(ReportRequestDto req)
         {
             return await _reportBo.GetByCondition(req);
+        }
+
+        [HttpPost]
+        [Route("Export")]
+        public async Task<FileResult> Print([FromBody] ExportDto req)
+        {
+            byte[] res = await _reportBo.Export(req);
+            if (res != null)
+            {
+                return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+            }
+
+            return null;
+            //return await _billBo.Print(billID);
         }
     }
 }

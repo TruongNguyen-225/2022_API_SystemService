@@ -9,4 +9,10 @@ namespace SystemServiceAPI.Dto.Report
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
     }
+
+    public class ExportDto
+    {
+        public int retailID { get; set; }
+        public string listID { get; set; }
+    }
 }

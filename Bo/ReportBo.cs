@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -67,6 +68,16 @@ namespace SystemServiceAPI.Bo
             }
 
             return await Task.FromResult(response);
+        }
+
+        public async Task<byte[]> Export(ExportDto req)
+        {
+            DataTable dataTable = new DataTable();
+            List<string> listID = req.listID.Split(';').ToList();
+
+            var data = _dbContext.vw_MonthlyTransactions.Where(x => listID.Contains(x.ID.ToString()) && x.RetailID == req.retailID).ToList();
+
+            //TODO
         }
     }
 }
