@@ -32,8 +32,8 @@ namespace SystemServiceAPI.Bo
                 {
                     data = _dbContext.vw_MonthlyTransactions.Where(
                         x => x.RetailID == req.RetailID &&
-                        x.DateTimeAdd >= req.StartTime &&
-                        x.DateTimeAdd <= req.EndTime
+                        x.DateTimeAdd.Date >= req.StartTime.Date  &&
+                        x.DateTimeAdd.Date <= req.EndTime.Date
                     ).OrderBy(x => x.ServiceID).OrderBy(x => x.DateTimeAdd).ToList();
                 }
                 else
@@ -41,8 +41,8 @@ namespace SystemServiceAPI.Bo
                     data = _dbContext.vw_MonthlyTransactions.Where(
                         x => x.ServiceID == req.ServiceID &&
                         x.RetailID == req.RetailID &&
-                        x.DateTimeAdd >= req.StartTime &&
-                        x.DateTimeAdd <= req.EndTime
+                        x.DateTimeAdd.Date >= req.StartTime.Date &&
+                        x.DateTimeAdd.Date <= req.EndTime.Date
                     ).OrderBy(x => x.ServiceID).OrderBy(x => x.DateTimeAdd).ToList();
                 }
                 
