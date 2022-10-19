@@ -50,6 +50,7 @@ namespace SystemServiceAPI.Helpers
             }
             return data;
         }
+
         public static DataTable GetDataReturnDataTable(string connection, string selectCommand)
         {
             DataTable results = new DataTable();
@@ -67,6 +68,7 @@ namespace SystemServiceAPI.Helpers
 
             return results;
         }
+
         /// <summary>
         /// check connect
         /// </summary>
@@ -90,6 +92,7 @@ namespace SystemServiceAPI.Helpers
                 }
             }
         }
+
         /// <summary>
         /// ExcuteNonQuerySQL
         /// </summary>

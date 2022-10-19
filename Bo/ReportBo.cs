@@ -101,7 +101,7 @@ namespace SystemServiceAPI.Bo
 
             var data = _dbContext.vw_MonthlyTransactions.Where(x => listID.Contains(x.ID.ToString()) && x.RetailID == req.retailID).ToList();
             dataTable = Utility.ToDataTable(data);
-            string pathTemplate = @"C:\DOCUMENTS\TemplateExportDataReport.xlsx";
+            string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport.xlsx";
 
             return EpplusHelper.ExportExcel(pathTemplate, 8, 1, 11, "%", dataTable);
         }

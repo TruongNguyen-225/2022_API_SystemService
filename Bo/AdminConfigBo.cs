@@ -107,7 +107,6 @@ namespace SystemServiceAPI.Bo
 
             try
             {
-
                 if (query.ToLower().Contains("select"))
                 {
                     DataTable data = new DataTable();

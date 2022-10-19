@@ -30,6 +30,11 @@ namespace SystemServiceAPI.Controllers
             return await _reportBo.GetByCondition(req);
         }
 
+        /// <summary>
+        /// Export data to excel template
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Export")]
         public FileResult Export([FromBody] ExportDto req)
