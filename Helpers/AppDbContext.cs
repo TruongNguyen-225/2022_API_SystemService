@@ -15,6 +15,7 @@ namespace SystemServiceAPI.Helpers
         }
 
         public virtual DbSet<Bank> Banks { get; set; } = null!;
+        public virtual DbSet<Account> Accounts { get; set; }
         //public virtual DbSet<CalculatorCash> CalculatorCashes { get; set; } = null!;
         //public virtual DbSet<CalculatorHistory> CalculatorHistories { get; set; } = null!;
         //public virtual DbSet<Cash> Cashes { get; set; } = null!;

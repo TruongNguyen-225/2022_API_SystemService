@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BillDto;
 
@@ -18,37 +19,95 @@ namespace SystemServiceAPI.Controllers
     public class MasterDataController : ControllerBase
     {
         private readonly IMasterData _masterBo;
-        public MasterDataController(IMasterData masterBo)
+        private readonly ILogger<MasterDataController> _logger;
+        public MasterDataController(IMasterData masterBo, ILogger<MasterDataController> logger)
         {
             _masterBo = masterBo;
+            _logger = logger;
         }
 
         [HttpGet]
         [Route("GetServices")]
         public async Task<object> GetServices()
         {
-            return await _masterBo.GetServices();
+            try
+            {
+                var result = await _masterBo.GetServices();
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogInformation(ex.Message);
+                throw;
+            }
         }
 
         [HttpGet]
         [Route("GetRetails")]
         public async Task<object> GetRetails()
         {
-            return await _masterBo.GetRetails();
+            try
+            {
+                var result = await _masterBo.GetRetails();
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.Message);
+                throw;
+            }
         }
 
         [HttpGet]
         [Route("GetBanks")]
         public async Task<object> GetBanks()
         {
-            return await _masterBo.GetBanks();
+            try
+            {
+                var result = await _masterBo.GetBanks();
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.Message);
+                throw;
+            }
         }
 
         [HttpGet]
         [Route("GetVillages")]
         public async Task<object> GetVillages()
         {
-            return await _masterBo.GetVillages();
+            try
+            {
+                var result = await _masterBo.GetVillages();
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.Message);
+                throw;
+            }
         }
     }
 }

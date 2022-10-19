@@ -18,92 +18,56 @@ namespace SystemServiceAPI.Bo
             _dbContext = appDbContext;
         }
 
-        public async Task<ResponseResults> GetServices()
+        public async Task<object> GetServices()
         {
-            ResponseResults response = new ResponseResults();
-
-            try
+            var data = _dbContext.Services;
+            if (data != null)
             {
-                var data = _dbContext.Services.ToList();
+                var result = data.ToList();
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
-                response.Msg = ex.Message;
+                return await Task.FromResult(result);
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(default(object));
         }
 
-        public async Task<ResponseResults> GetRetails()
+        public async Task<object> GetRetails()
         {
-            ResponseResults response = new ResponseResults();
-
-            try
+            var data = _dbContext.Retails;
+            if (data != null)
             {
-                var data = _dbContext.Retails.ToList();
+                var result = data.ToList();
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                return await Task.FromResult(result);
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(default(object));
         }
 
-        public async Task<ResponseResults> GetBanks()
+        public async Task<object> GetBanks()
         {
-            ResponseResults response = new ResponseResults();
-
-            try
+            var data = _dbContext.Banks;
+            if (data != null)
             {
-                var data = _dbContext.Banks.ToList();
+                var result = data.ToList();
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
-                response.Msg = ex.Message;
+                return await Task.FromResult(result);
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(default(object));
         }
 
-        public async Task<ResponseResults> GetVillages()
+        public async Task<object> GetVillages()
         {
-            ResponseResults response = new ResponseResults();
-
-            try
+            var data = _dbContext.Villages;
+            if (data != null)
             {
-                var data = _dbContext.Villages.ToList();
+                var result = data.ToList();
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = null;
-                response.Msg = ex.Message;
+                return await Task.FromResult(result);
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(default(object));
         }
     }
 }

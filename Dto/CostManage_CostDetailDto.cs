@@ -1,24 +1,30 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
-namespace SystemServiceAPI.Entities.Table
+namespace SystemServiceAPICore3.Dto
 {
-    [Table("CostManage_CostDetail")]
-    public partial class CostManage_CostDetail
+    public class CostManage_CostDetailDto
     {
+        [DataMember]
         public int CostDetailID { get; set; }
+
+        [DataMember]
         public int GroupCostID { get; set; }
-        [Required]
-        [StringLength(50)]
+
+        [DataMember]
         public string CostDetailName { get; set; }
+
+        [DataMember]
         public double Estimate { get; set; }
-        [Required]
-        [StringLength(1000)]
+
+        [DataMember]
         public string Descript { get; set; }
-        [Column(TypeName = "date")]
+
+        [DataMember]
         public DateTime DateTimeCreate { get; set; }
-        [Column(TypeName = "date")]
+
+        [DataMember]
         public DateTime? DateTimeUpdate { get; set; }
     }
 }

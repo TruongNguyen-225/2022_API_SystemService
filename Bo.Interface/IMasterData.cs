@@ -5,9 +5,9 @@ namespace SystemServiceAPI.Bo.Interface
 {
     public interface IMasterData
     {
-        Task<ResponseResults> GetServices();
-        Task<ResponseResults> GetRetails();
-        Task<ResponseResults> GetBanks();
-        Task<ResponseResults> GetVillages();
+        Task<object> GetServices();
+        Task<object> GetRetails();
+        Task<object> GetBanks();
+        Task<object> GetVillages();
     }
 }
