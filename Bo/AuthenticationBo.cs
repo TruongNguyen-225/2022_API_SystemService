@@ -27,6 +27,9 @@ namespace SystemServiceAPICore3.Bo
 
         public void UpdateRefreshToken(Account account)
         {
+            account.LastLogin = DateTime.Now;
+            account.DateTimeAdd = DateTime.Now;
+
             Account entity = dbContext.Accounts.Update(account).Entity;
             dbContext.SaveChangesAsync();
         }
