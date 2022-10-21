@@ -9,6 +9,8 @@ using System.Text.Json.Serialization;
 using SystemServiceAPI.Bo;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Helpers;
+using SystemServiceAPICore3.Bo;
+using SystemServiceAPICore3.Bo.Interface;
 
 namespace SystemServiceAPICore3.Infrastructure.Extensions
 {
@@ -40,6 +42,7 @@ namespace SystemServiceAPICore3.Infrastructure.Extensions
 
         public static void AddEntityService(this IServiceCollection services)
         {
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IBillBo, BillBo>();
             services.AddScoped<ICustomer, CustomerBo>();
             services.AddScoped<IMasterData, MasterDataBo>();
@@ -47,6 +50,7 @@ namespace SystemServiceAPICore3.Infrastructure.Extensions
             services.AddScoped<IDashboard, DashboardBo>();
             services.AddScoped<IAdminConfig, AdminConfigBo>();
             services.AddScoped<IBillTempBo, BillTempBo>();
+            services.AddScoped<IAuthenticationBo, AuthenticationBo>();
         }
 
         private static void AddDal(this IServiceCollection services, IConfiguration configuration)

@@ -20,5 +20,7 @@ namespace SystemServiceAPI.Entities.Table
         public string OTP { get; set; }
         public DateTime? LastLogin { get; set; }
         public DateTime? DateTimeAdd { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
     }
 }

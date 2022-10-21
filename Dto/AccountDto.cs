@@ -34,5 +34,11 @@ namespace SystemServiceAPI.Dto
         
         [DataMember]
         public DateTime? DateTimeAdd { get; set; }
+
+        [DataMember]
+        public string RefreshToken { get; set; }
+
+        [DataMember]
+        public DateTime? RefreshTokenExpiryTime { get; set; }
     }
 }
