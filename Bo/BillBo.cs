@@ -18,35 +18,44 @@ namespace SystemServiceAPI.Bo
 {
     public class BillBo: IBillBo
     {
+        #region -- parameters --
+
         private readonly AppDbContext _dbContext;
+
+        #endregion
+
+        #region -- contructor --
+
         public BillBo(AppDbContext appDbContext)
         {
             _dbContext = appDbContext;
         }
 
-        public async Task<object> GetByServiceID(int serviceID)
+        #endregion
+
+        #region -- implements --
+
+
+
+        #endregion
+
+        public async Task<List<vw_MonthlyTransaction>> GetByServiceID(int serviceID)
         {
-            ResponseResults response = new ResponseResults();
-            try
-            {
-                List<vw_MonthlyTransaction> data = await _dbContext.vw_MonthlyTransactions.Where(
+
+            List<vw_MonthlyTransaction> result = new List<vw_MonthlyTransaction>();
+
+            var data = _dbContext.vw_MonthlyTransactions.Where(
                    x => x.ServiceID == serviceID &&
                    x.Month == DateTime.Now.Month &&
                    x.Year == DateTime.Now.Year
-               ).OrderByDescending(x => x.DateTimeAdd).ToListAsync();
+               ).OrderByDescending(x => x.DateTimeAdd);
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
+            if (data.Any())
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                result = await data.ToListAsync();
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(result);
         }
 
         public async Task<object> GetByMonth(BillFilterDto req)

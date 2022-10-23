@@ -32,7 +32,21 @@ namespace SystemServiceAPI.Controllers
         [Route("GetByServiceID/{serviceID}")]
         public async Task<object> GetByServiceID(int serviceID)
         {
-            return await _billBo.GetByServiceID(serviceID);
+            try
+            {
+                var result =  await _billBo.GetByServiceID(serviceID);
+                if(result.Count > 0)
+                {
+                    return Ok(result);
+                }
+
+                return NoContent();
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         [HttpPost]

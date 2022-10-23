@@ -19,9 +19,28 @@
   <ItemGroup>
     <None Remove="DocumentFormat.OpenXml" />
     <None Remove="Helpers\Constant\" />
+    <None Remove="Repository\" />
+    <None Remove="Domain\" />
+    <None Remove="Domain\Repositories\" />
+    <None Remove="Domain\Uow\" />
+    <None Remove="Domain\Helpers\" />
+    <None Remove="Services\" />
+    <None Remove="Services\Interfaces\" />
+    <None Remove="Services\Expressions\" />
+    <None Remove="Logging\" />
+    <None Remove="Logging\Interfaces\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\Constant\" />
     <Folder Include="Infrastructure\Helpers\" />
+    <Folder Include="Domain\" />
+    <Folder Include="Domain\Repositories\" />
+    <Folder Include="Domain\Uow\" />
+    <Folder Include="Domain\Helpers\" />
+    <Folder Include="Services\" />
+    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Services\Expressions\" />
+    <Folder Include="Logging\" />
+    <Folder Include="Logging\Interfaces\" />
   </ItemGroup>
 </Project>

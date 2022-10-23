@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
@@ -8,7 +9,7 @@ namespace SystemServiceAPI.Bo.Interface
 {
     public interface IBillBo
     {
-        Task<object> GetByServiceID(int serviceID);
+        Task<List<vw_MonthlyTransaction>> GetByServiceID(int serviceID);
         Task<object> GetByMonth(BillFilterDto req);
         Task<ResponseResults> Post(BillRequestDto req);
         Task<ResponseResults> Put(BillUpdatetDto req);
