@@ -95,23 +95,23 @@ namespace SystemServiceAPICore3.Uow.Interface
             }
         }
 
-        public override void CreateSavepoint(string savePoint = "default")
-        {
-            if (transactionScope != null)
-            {
-                transactionScope.CreateSavepoint(savePoint);
-            }
-        }
+        //public override void CreateSavepoint(string savePoint = "default")
+        //{
+        //    if (transactionScope != null)
+        //    {
+        //        transactionScope.CreateSavepoint(savePoint);
+        //    }
+        //}
 
-        public override void RollbackToSavepoint(string savePoint = "default")
-        {
-            if (transactionScope != null && !string.IsNullOrEmpty(savePoint))
-            {
-                transactionScope.RollbackToSavepoint(savePoint);
-                transactionScope.Dispose();
-                transactionScope = null;
-            }
-        }
+        //public override void RollbackToSavepoint(string savePoint = "default")
+        //{
+        //    if (transactionScope != null && !string.IsNullOrEmpty(savePoint))
+        //    {
+        //        transactionScope.RollbackToSavepoint(savePoint);
+        //        transactionScope.Dispose();
+        //        transactionScope = null;
+        //    }
+        //}
 
         public override async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
@@ -141,23 +141,23 @@ namespace SystemServiceAPICore3.Uow.Interface
             }
         }
 
-        public override async Task CreateSavepointAsync(string savePoint = "default", CancellationToken cancellationToken = default)
-        {
-            if (transactionScope != null)
-            {
-                await transactionScope.CreateSavepointAsync(savePoint, cancellationToken);
-            }
-        }
+        //public override async Task CreateSavepointAsync(string savePoint = "default", CancellationToken cancellationToken = default)
+        //{
+        //    if (transactionScope != null)
+        //    {
+        //        await transactionScope.CreateSavepointAsync(savePoint, cancellationToken);
+        //    }
+        //}
 
-        public override async Task RollbackToSavepointAsync(string savePoint = "default", CancellationToken cancellationToken = default)
-        {
-            if (transactionScope != null && !string.IsNullOrEmpty(savePoint))
-            {
-                await transactionScope.RollbackToSavepointAsync(savePoint, cancellationToken);
-                transactionScope.Dispose();
-                transactionScope = null;
-            }
-        }
+        //public override async Task RollbackToSavepointAsync(string savePoint = "default", CancellationToken cancellationToken = default)
+        //{
+        //    if (transactionScope != null && !string.IsNullOrEmpty(savePoint))
+        //    {
+        //        await transactionScope.RollbackToSavepointAsync(savePoint, cancellationToken);
+        //        transactionScope.Dispose();
+        //        transactionScope = null;
+        //    }
+        //}
 
         public override bool Save()
         {
@@ -207,7 +207,7 @@ namespace SystemServiceAPICore3.Uow.Interface
 
         protected override IGenericRepository<T> CreateRepository<T>()
         {
-            return new EfCoreGenerißcRepository<T>(Context);
+            return new EfCoreGenericRepository<T>(Context);
         }
 
         protected override void DisposeData()

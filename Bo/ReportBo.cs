@@ -5,10 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.Report;
 using SystemServiceAPI.Entities.View;
-using SystemServiceAPI.Helpers;
 using SystemServiceAPICore3.Utilities;
 
 namespace SystemServiceAPI.Bo
@@ -16,6 +16,7 @@ namespace SystemServiceAPI.Bo
     public class ReportBo :IReport
     {
         private readonly AppDbContext _dbContext;
+
         public ReportBo(AppDbContext appDbContext)
         {
             _dbContext = appDbContext;

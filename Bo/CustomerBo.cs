@@ -5,215 +5,244 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.CustomerID;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
-using SystemServiceAPI.Helpers;
+using SystemServiceAPICore3.Bo;
+using SystemServiceAPICore3.Dto;
 
 namespace SystemServiceAPI.Bo
 {
-    public class CustomerBo : ICustomer
+    public class CustomerBo : BaseBo<CustomerDto, Customer>, ICustomer
     {
+        #region -- Variables --
+
         private readonly AppDbContext _dbContext;
-        public CustomerBo(AppDbContext appDbContext)
+
+        #endregion
+
+        #region -- Properties --
+        #endregion
+
+        #region -- Constructors --
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TS_tblLeaveRecordBo"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        public CustomerBo(IServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
-            _dbContext = appDbContext;
         }
 
-        public async Task<ResponseResults> GetCustomerByID(int customerID)
+        #endregion
+
+        #region -- Overrides --
+        #endregion
+
+        #region -- Implements --
+
+        /// <summary>
+        /// Lấy thông tin khách hàng khi biết customerID
+        /// </summary>
+        /// <param name="customerID"></param>
+        /// <returns></returns>
+        public async Task<object> GetCustomerByID(int customerID)
         {
-            ResponseResults response = new ResponseResults();
-            try
-            {
-                var data = await _dbContext.vw_Customers.Where(x => x.CustomerID == customerID && x.IsDelete == false).FirstOrDefaultAsync();
-                if (data != null)
-                {
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = data;
-                    response.Msg = "SUCCESS";
-                }
-                else
-                {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
-                }
+            var customerQueryable = GetQueryable<vw_Customer>();
+            var dataCustomer = await customerQueryable
+                                    .Where(x => x.CustomerID == customerID && x.IsDelete == false)
+                                    .FirstOrDefaultAsync();
 
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
-            }
-
-            return await Task.FromResult(response);
-        }
-        
-        public async Task<ResponseResults> GetCustomerByServiceID(int serviceID)
-        {
-            ResponseResults response = new ResponseResults();
-            try
-            {
-                var data = await _dbContext.vw_Customers
-                    .Where(x => x.ServiceID == serviceID && x.IsDelete == false)
-                    .OrderByDescending(x => x.DateTimeAdd)
-                    .ToListAsync();
-                if (data != null)
-                {
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = data;
-                    response.Msg = "SUCCESS";
-                }
-                else
-                {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
-                }
-
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
-            }
-
-            return await Task.FromResult(response);
+            return await Task.FromResult(dataCustomer);
         }
 
-        public async Task<ResponseResults> GetByCondition(CustomerRequestDto req)
+        /// <summary>
+        /// Lấy danh sách khách hàng với serviceID
+        /// </summary>
+        /// <param name="serviceID"></param>
+        /// <returns></returns>
+        public async Task<object> GetCustomerByServiceID(int serviceID)
         {
-            ResponseResults response = new ResponseResults();
+            var customerQueryable = GetQueryable<vw_Customer>();
+            var customers = customerQueryable
+                            .Where(x => x.ServiceID == serviceID && x.IsDelete == false)
+                            .OrderByDescending(x => x.DateTimeAdd);
 
-            try
+            if (customers.Any())
             {
-                List<vw_Customer> data = new List<vw_Customer>();
-
-                if (req.RetailID.HasValue && req.ServiceID.HasValue)
-                {
-                    data = await _dbContext.vw_Customers
-                        .Where(x => x.ServiceID == req.ServiceID && x.RetailID == req.RetailID && x.IsDelete == false)
-                        .OrderByDescending(x => x.DateTimeAdd)
-                        .ToListAsync();
-                }
-                else
-                {
-                    if (req.RetailID.HasValue && !req.ServiceID.HasValue)
-                    {
-                        data = await _dbContext.vw_Customers
-                            .Where(x => x.RetailID == req.RetailID)
-                            .OrderByDescending(x => x.DateTimeAdd)
-                            .ToListAsync();
-                    }
-                    else
-                    {
-                        data = await _dbContext.vw_Customers
-                            .Where(x => x.ServiceID == req.ServiceID)
-                            .OrderByDescending(x => x.DateTimeAdd)
-                            .ToListAsync();
-                    }
-                }
-
-                if (data.Count > 0)
-                {
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = data;
-                    response.Msg = "SUCCESS";
-                }
-                else
-                {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                var result = await customers.ToListAsync();
+                return await Task.FromResult(result);
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(default(object));
         }
 
-        public async Task<ResponseResults> Post(AddCustomerDto req)
+        /// <summary>
+        /// Lấy danh sách khách hàng theo nhiều điều kiện
+        /// Theo serviceID
+        /// Theo RetailID
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        public async Task<List<vw_Customer>> GetByCondition(CustomerRequestDto req)
         {
-            ResponseResults response = new ResponseResults();
-            try
+            List<vw_Customer> result = new List<vw_Customer>();
+
+            int? retailID = req.RetailID;
+            int? serviceID = req.ServiceID;
+            var customerQueryable = GetQueryable<vw_Customer>();
+
+            if (retailID.HasValue && serviceID.HasValue)
             {
-                //với khách hàng đóng tiền điện => code không trùng
-                if (req.ServiceID == 1)
+                var customers = customerQueryable
+                    .Where(x => x.ServiceID == serviceID.Value
+                        && x.RetailID == retailID.Value
+                        && x.IsDelete == false)
+                    .OrderByDescending(x => x.DateTimeAdd);
+
+                if (customers.Any())
                 {
-                    var isExistCode = _dbContext.Customers.Where(
-                            x => x.Code == req.Code &&
-                            x.ServiceID == 1
-                        ).FirstOrDefault();
-
-                    if (isExistCode != null)
-                    {
-                        response.Code = (int)HttpStatusCode.InternalServerError;
-                        response.Result = null;
-                        response.Msg = "Mã số tiền điện " + req.Code + " đã tồn tại";
-
-                        return await Task.FromResult(response);
-                    }
-
-                    var isExistName = await _dbContext.Customers.Where(
-                           x => x.FullName.ToLower() == req.FullName.ToLower() &&
-                           x.ServiceID == 1
-                       ).ToListAsync();
-
-                    if (isExistName != null && isExistName.Count > 0)
-                    {
-                        req.FullName = req.FullName + "(" + isExistName.Count() + 1 + ")";
-                    }
+                    result = await customers.ToListAsync();
                 }
-                else
-                {
-                    var isExistName = await _dbContext.Customers.Where(y => y.FullName.ToLower() == req.FullName.ToLower()).ToListAsync();
-
-                    if (isExistName.Count > 0)
-                    {
-                        req.FullName = req.FullName + "|" + _dbContext.Banks.Where(x => x.BankID == req.BankID).Select(y => y.ShortName).FirstOrDefault();
-                    }
-
-                }
-
-                Customer c = new Customer();
-                c.RetailID = req.RetailID;
-                c.ServiceID = req.ServiceID;
-                c.BankID = req.BankID;
-                c.FullName = req.FullName;
-                c.Code = req.Code;
-                c.Address = req.Address;
-                c.Hotline = req.Hotline;
-                c.IsDelete = req.IsDelete;
-                c.VillageID = req.VillageID;
-                c.DateTimeAdd = req.DateTimeAdd;
-                c.DateTimeUpdate = null;
-
-                _dbContext.Add(c);
-                _dbContext.SaveChanges();
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = c;
-                response.Msg = "SUCCESS";
-
             }
-            catch (Exception ex)
+            else if (retailID.HasValue && !serviceID.HasValue)
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                var customers = customerQueryable
+                    .Where(x => x.RetailID == retailID.Value && x.IsDelete == false)
+                    .OrderByDescending(x => x.DateTimeAdd);
+
+                if (customers.Any())
+                {
+                    result = await customers.ToListAsync();
+                }
+            }
+            else
+            {
+                var customers = customerQueryable
+                    .Where(x => x.ServiceID == serviceID.Value && x.IsDelete == false)
+                    .OrderByDescending(x => x.DateTimeAdd);
+
+                if (customers.Any())
+                {
+                    result = await customers.ToListAsync();
+                }
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(result);
         }
 
+        /// <summary>
+        /// Thêm mới khách hàng
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        public async Task<object> Post(AddCustomerDto req)
+        {
+
+            int serviceID = req.ServiceID;
+            string code = req.Code;
+            string fullName = req.FullName;
+            int retailID = req.RetailID;
+            int? bankID = req.BankID;
+
+            var customerQueryable = GetQueryable<Customer>();
+            var bankQueryable = GetQueryable<Bank>();
+            var retailQueryable = GetQueryable<Retail>();
+            var serviceQueryable = GetQueryable<Service>();
+            var customerRepository = GetRepository<Customer>();
+
+            //Tiền điện
+            if (serviceID == 1)
+            {
+                var customerByCode = await customerQueryable
+                    .Where(x => x.Code == code && x.ServiceID == serviceID && x.IsDelete == false)
+                    .FirstOrDefaultAsync();
+
+                if (customerByCode != null)
+                {
+                    return await Task.FromResult(default(object));
+                }
+
+                var customerByFullName = (from queryable in customerQueryable
+                                          .Where(x => x.FullName.ToLower() == fullName.ToLower()
+                                            && x.ServiceID == serviceID
+                                            && x.IsDelete == false)
+                                          select new
+                                          {
+                                              Code = queryable.Code,
+                                              RetailName = queryable.RetailID
+                                          }).FirstOrDefaultAsync();
+
+                if (customerByFullName != null)
+                {
+                    code = customerByFullName.Result.Code;
+                    code = code.Substring(code.Length - 5, code.Length);
+                    req.FullName += $"{fullName}|{code}";
+                }
+
+                var customerDto = mapper.Map<AddCustomerDto, CustomerDto>(req);
+                customerDto = Insert(customerDto);
+
+                return await Task.FromResult(customerDto);
+            }
+
+            var customersByCode = (from customer in customerQueryable
+                                   from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
+                                   from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
+                                   from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
+                                   where customer.Code == code
+                                        && customer.ServiceID != 1
+                                        && customer.IsDelete == false
+                                   select new
+                                   {
+                                       Code = customer.Code,
+                                       FullName = customer.FullName,
+                                       BankName = bank.ShortName,
+                                       BankID = bank.BankID,
+                                       RetailName = retail.RetailName,
+                                       RetailID = retail.RetailID,
+                                       ServiceName = service.ServiceName,
+                                       ServiceID = service.ServiceID
+                                   }).FirstOrDefaultAsync();
+            //TH: Code đã tồn tại ở bất kì chi nhánh nào, dịch vụ nào trừ tiền điện
+            if (customersByCode != null)
+            {
+                string codeQuery = customersByCode.Result.Code;
+                string fullNameQuery = customersByCode.Result.FullName;
+                string bankNameQuery = customersByCode.Result.BankName;
+                string serviceNameQuery = customersByCode.Result.ServiceName;
+                string retailNameQuery = customersByCode.Result.RetailName;
+                int? bankIDQuery = customersByCode.Result.BankID;
+                int retailIDQuery = customersByCode.Result.RetailID;
+                int serviceIDQuery = customersByCode.Result.ServiceID;
+
+                //TH1. Cùng code và chi nhánh và cùng luôn ngân hàng => Đã tồn tại
+                if (retailID == retailIDQuery && bankID == bankIDQuery)
+                {
+                    return await Task.FromResult(default(object));
+                }
+
+                //TH2: Cùng code khác chi nhánh => insert Chi Nhánh|Tên Khách
+                req.FullName = String.Format("{0}|{1}", retailNameQuery, fullNameQuery);
+            }
+
+            string retailNameByID = retailQueryable.Where(x => x.RetailID == retailID).Select(x => x.RetailName).FirstOrDefault();
+            req.FullName = String.Format("{0}|{1}", retailNameByID, fullName);
+
+            var dto = mapper.Map<AddCustomerDto, CustomerDto>(req);
+            dto = Insert(dto);
+
+            return await Task.FromResult(dto);
+        }
+
+        /// <summary>
+        /// Cập nhật khách hàng
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         public async Task<ResponseResults> Put(UpdateCustomerDto req)
         {
             ResponseResults response = new ResponseResults();
@@ -353,5 +382,7 @@ namespace SystemServiceAPI.Bo
 
             return await Task.FromResult(response);
         }
+
+        #endregion
     }
 }

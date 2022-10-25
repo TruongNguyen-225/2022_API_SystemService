@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
-using SystemServiceAPI.Helpers;
 
 namespace SystemServiceAPI.Bo
 {

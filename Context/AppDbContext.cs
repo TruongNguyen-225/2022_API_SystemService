@@ -2,7 +2,7 @@
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
 
-namespace SystemServiceAPI.Helpers
+namespace SystemServiceAPI.Context
 {
     public partial class AppDbContext : DbContext
     {

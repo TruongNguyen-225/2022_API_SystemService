@@ -1,16 +1,14 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Net;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Helpers;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
 using SystemServiceAPICore3.Utilities;
-using System.Reflection;
-using System.Linq;
 
 namespace SystemServiceAPI.Bo
 {

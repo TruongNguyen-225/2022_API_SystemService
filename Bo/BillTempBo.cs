@@ -5,11 +5,11 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
-using SystemServiceAPI.Helpers;
 
 namespace SystemServiceAPI.Bo
 {

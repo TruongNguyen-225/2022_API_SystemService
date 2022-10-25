@@ -1,12 +1,7 @@
-﻿using System.Net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Dto.BaseResult;
-using SystemServiceAPI.Helpers;
+using SystemServiceAPI.Context;
 
 namespace SystemServiceAPI.Bo
 {

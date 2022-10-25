@@ -15,6 +15,8 @@
     </PackageReference>
     <PackageReference Include="System.Text.Json" Version="6.0.5" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.17.1" />
+    <PackageReference Include="Npgsql" Version="6.0.7" />
+    <PackageReference Include="MySqlConnector" Version="2.1.13" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="DocumentFormat.OpenXml" />
@@ -29,6 +31,13 @@
     <None Remove="Services\Expressions\" />
     <None Remove="Logging\" />
     <None Remove="Logging\Interfaces\" />
+    <None Remove="Uow\" />
+    <None Remove="Domain.General\" />
+    <None Remove="Domain.General\Uow\" />
+    <None Remove="Npgsql" />
+    <None Remove="MySqlConnector" />
+    <None Remove="Context\" />
+    <None Remove="Utilities\Constants\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\Constant\" />
@@ -42,5 +51,10 @@
     <Folder Include="Services\Expressions\" />
     <Folder Include="Logging\" />
     <Folder Include="Logging\Interfaces\" />
+    <Folder Include="Uow\" />
+    <Folder Include="Domain.General\" />
+    <Folder Include="Domain.General\Uow\" />
+    <Folder Include="Context\" />
+    <Folder Include="Utilities\Constants\" />
   </ItemGroup>
 </Project>

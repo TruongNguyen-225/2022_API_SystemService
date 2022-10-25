@@ -4,19 +4,18 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Packaging;
 using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
-using SystemServiceAPI.Helpers;
 using SystemServiceAPICore3.Utilities;
 
 namespace SystemServiceAPI.Bo
 {
-    public class BillBo: IBillBo
+    public class BillBo : IBillBo
     {
         #region -- parameters --
 

@@ -1,13 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using SystemServiceAPI.Dto;
+using SystemServiceAPI.Context;
 using SystemServiceAPI.Entities.Table;
-using SystemServiceAPI.Helpers;
 using SystemServiceAPICore3.Bo.Interface;
-using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPICore3.Bo
 {

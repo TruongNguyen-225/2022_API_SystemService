@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Dto;
+using SystemServiceAPI.Dto.CustomerID;
 using SystemServiceAPI.Entities.Table;
+using SystemServiceAPICore3.Dto;
 
 namespace SystemServiceAPICore3.Profiles
 {
@@ -15,6 +17,12 @@ namespace SystemServiceAPICore3.Profiles
             //Account
             CreateMap<Account, AccountDto>();
             CreateMap<AccountDto, Account>();
+
+            //Customer
+            CreateMap<Customer, CustomerDto>();
+            CreateMap<CustomerDto, Customer>();
+            CreateMap<AddCustomerDto, CustomerDto>();
+
         }
     }
 }
