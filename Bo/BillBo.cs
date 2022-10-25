@@ -17,13 +17,16 @@ namespace SystemServiceAPI.Bo
 {
     public class BillBo : IBillBo
     {
-        #region -- parameters --
+        #region -- Variables --
 
         private readonly AppDbContext _dbContext;
 
         #endregion
 
-        #region -- contructor --
+        #region -- Properties --
+        #endregion
+
+        #region -- Constructors --
 
         public BillBo(AppDbContext appDbContext)
         {
@@ -32,109 +35,79 @@ namespace SystemServiceAPI.Bo
 
         #endregion
 
-        #region -- implements --
-
-
-
+        #region -- Overrides --
         #endregion
 
         public async Task<List<vw_MonthlyTransaction>> GetByServiceID(int serviceID)
         {
-
             List<vw_MonthlyTransaction> result = new List<vw_MonthlyTransaction>();
-
-            var data = _dbContext.vw_MonthlyTransactions.Where(
+            var queryable = _dbContext.vw_MonthlyTransactions.Where(
                    x => x.ServiceID == serviceID &&
                    x.Month == DateTime.Now.Month &&
                    x.Year == DateTime.Now.Year
                ).OrderByDescending(x => x.DateTimeAdd);
 
-            if (data.Any())
+            if (queryable.Any())
             {
-                result = await data.ToListAsync();
+                result = await queryable.ToListAsync();
             }
 
             return await Task.FromResult(result);
         }
 
-        public async Task<object> GetByMonth(BillFilterDto req)
+        public async Task<List<vw_MonthlyTransaction>> GetByMonth(BillFilterDto req)
         {
-            ResponseResults response = new ResponseResults();
-            try
-            {
-                List<vw_MonthlyTransaction> data = await _dbContext.vw_MonthlyTransactions.Where(
-                    x => x.Month == req.Month &&
-                    x.Year == DateTime.Now.Year &&
-                    x.ServiceID == req.ServiceID
-                ).ToListAsync();
+            List<vw_MonthlyTransaction> result = new List<vw_MonthlyTransaction>();
+            var queryable = _dbContext.vw_MonthlyTransactions.Where(
+                      x => x.Month == req.Month &&
+                      x.Year == DateTime.Now.Year &&
+                      x.ServiceID == req.ServiceID
+                  );
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
+            if (queryable.Any())
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                result = await queryable.ToListAsync();
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(result);
         }
 
-        public async Task<ResponseResults> Post(BillRequestDto req)
+        public async Task<MonthlyTransaction> Post(BillRequestDto req)
         {
-            ResponseResults response = new ResponseResults();
-            try
+            MonthlyTransaction transaction = new MonthlyTransaction();
+            transaction.CustomerID = req.CustomerID;
+            transaction.ServiceID = req.ServiceID;
+            transaction.RetailID = req.RetailID;
+            transaction.BankID = req.BankID;
+            transaction.Code = req.Code;
+            transaction.Money = req.Money;
+            transaction.Postage = req.Postage;
+            transaction.Total = req.Total;
+            transaction.Status = req.Status;
+            transaction.DateTimeAdd = DateTime.Now;
+            transaction.DateTimeUpdate = null;
+
+            _dbContext.Add(transaction);
+            _dbContext.SaveChanges();
+
+            return await Task.FromResult(transaction);
+        }
+
+        public async Task<bool> CheckBeforeAddBillElectricity(int serviceID, string code)
+        {
+            var dataElectric = _dbContext.MonthlyTransactions.Where(
+                        x => x.Code == code &&
+                        x.ServiceID == serviceID &&
+                        x.DateTimeAdd.Month == DateTime.Now.Month &&
+                        x.DateTimeAdd.Year == DateTime.Now.Year
+                    ).FirstOrDefault();
+
+            if (dataElectric != null)
             {
-                //check xem đơn đã tồn tại chưa, đối với hóa đơn tiền điện
-                if(req.ServiceID == 1)
-                {
-                    var checkExist = _dbContext.MonthlyTransactions.Where(
-                            x => x.Code == req.Code && 
-                            x.ServiceID == 1 && 
-                            x.DateTimeAdd.Month == DateTime.Now.Month && 
-                            x.DateTimeAdd.Year == DateTime.Now.Year
-                        ).FirstOrDefault();
-
-                    if(checkExist != null)
-                    {
-                        response.Code = (int)HttpStatusCode.InternalServerError;
-                        response.Result = null;
-                        response.Msg = "Mã số tiền điện " +req.Code + " đã được đóng";
-
-                        return await Task.FromResult(response);
-                    }
-                }
-
-                MonthlyTransaction m = new MonthlyTransaction();
-                m.CustomerID = req.CustomerID;
-                m.ServiceID = req.ServiceID;
-                m.RetailID = req.RetailID;
-                m.BankID = req.BankID;
-                m.Code = req.Code;
-                m.Money = req.Money;
-                m.Postage = req.Postage;
-                m.Total = req.Total;
-                m.Status = req.Status;
-                m.DateTimeAdd = DateTime.Now;
-                m.DateTimeUpdate = null;
-
-                _dbContext.Add(m);
-                _dbContext.SaveChanges();
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = m;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                return await Task.FromResult(true);
             }
 
-            return await Task.FromResult(response);
+            return await Task.FromResult(false);
         }
 
         public async Task<ResponseResults> Put(BillUpdatetDto req)
@@ -154,7 +127,7 @@ namespace SystemServiceAPI.Bo
                     billData.Postage = req.Postage;
                     billData.Total = req.Total;
                     billData.DateTimeUpdate = DateTime.Now;
-
+                    
                     _dbContext.Update(billData);
                     _dbContext.SaveChanges();
 

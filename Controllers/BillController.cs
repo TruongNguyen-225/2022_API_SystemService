@@ -19,7 +19,7 @@ namespace SystemServiceAPI.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class BillController : ControllerBase
     {
         private readonly IBillBo _billBo;
@@ -60,7 +60,25 @@ namespace SystemServiceAPI.Controllers
         [Route("Post")]
         public async Task<object> Post(BillRequestDto req)
         {
-            return await _billBo.Post(req);
+            int serviceID = req.ServiceID;
+            string code = req.Code;
+
+            if (serviceID == 1)
+            {
+                bool isExisted = await _billBo.CheckBeforeAddBillElectricity(serviceID, code);
+                if(isExisted)
+                {
+                    return await Task.FromResult(default(object));
+                }
+            }
+
+            var result = _billBo.Post(req);
+            if(result != null)
+            {
+                return Ok(result);
+            }
+
+            return NoContent();
         }
 
         [HttpPost]
