@@ -141,7 +141,6 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<object> Post(AddCustomerDto req)
         {
-
             int serviceID = req.ServiceID;
             string code = req.Code;
             string fullName = req.FullName;
@@ -206,18 +205,16 @@ namespace SystemServiceAPI.Bo
                                        RetailID = retail.RetailID,
                                        ServiceName = service.ServiceName,
                                        ServiceID = service.ServiceID
-                                   }).FirstOrDefaultAsync();
+                                   }).FirstOrDefault();
             //TH: Code đã tồn tại ở bất kì chi nhánh nào, dịch vụ nào trừ tiền điện
             if (customersByCode != null)
             {
-                string codeQuery = customersByCode.Result.Code;
-                string fullNameQuery = customersByCode.Result.FullName;
-                string bankNameQuery = customersByCode.Result.BankName;
-                string serviceNameQuery = customersByCode.Result.ServiceName;
-                string retailNameQuery = customersByCode.Result.RetailName;
-                int? bankIDQuery = customersByCode.Result.BankID;
-                int retailIDQuery = customersByCode.Result.RetailID;
-                int serviceIDQuery = customersByCode.Result.ServiceID;
+                string codeQuery = customersByCode.Code;
+                string fullNameQuery = customersByCode.FullName;
+                string bankNameQuery = customersByCode.BankName;
+                string retailNameQuery = customersByCode.RetailName;
+                int? bankIDQuery = customersByCode.BankID;
+                int retailIDQuery = customersByCode.RetailID;
 
                 //TH1. Cùng code và chi nhánh và cùng luôn ngân hàng => Đã tồn tại
                 if (retailID == retailIDQuery && bankID == bankIDQuery)
