@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using System;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.CustomerID;
+using SystemServiceAPICore3.Controllers;
+using SystemServiceAPICore3.Dto;
 
 namespace SystemServiceAPI.Controllers
 {
@@ -10,13 +14,30 @@ namespace SystemServiceAPI.Controllers
     [Produces("application/json")]
     [Route("api/[controller]")]
     //[Authorize]
-    public class CustomerController : ControllerBase
+    public class CustomerController : BaseController<CustomerDto>
     {
-        private readonly ICustomer _customerBo;
-        public CustomerController(ICustomer customerBo)
+        #region -- Variables --
+
+        private readonly ICustomer customerBo;
+
+        #endregion
+
+        #region -- Properties --
+        #endregion
+
+        #region -- Constructors --
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DashboardController"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        public CustomerController(IServiceProvider serviceProvider, ICustomer customerBo)
+            : base(serviceProvider)
         {
-            _customerBo = customerBo;
+            this.customerBo = customerBo;
         }
+
+        #endregion
 
         /// <summary>
         /// Get information customer by CustomerID
@@ -27,7 +48,7 @@ namespace SystemServiceAPI.Controllers
         [Route("GetCustomerByID/{customerID}")]
         public async Task<object> GetCustomerByID(int customerID)
         {
-            return await _customerBo.GetCustomerByID(customerID);
+            return await customerBo.GetCustomerByID(customerID);
         }
 
         /// <summary>
@@ -39,7 +60,7 @@ namespace SystemServiceAPI.Controllers
         [Route("GetCustomerByServiceID/{serviceID}")]
         public async Task<object> GetCustomerByServiceID(int serviceID)
         {
-            return await _customerBo.GetCustomerByServiceID(serviceID);
+            return await customerBo.GetCustomerByServiceID(serviceID);
         }
 
         /// <summary>
@@ -51,7 +72,7 @@ namespace SystemServiceAPI.Controllers
         [Route("GetByCondition")]
         public async Task<object> GetByCondition(CustomerRequestDto req)
         {
-            return await _customerBo.GetByCondition(req);
+            return await customerBo.GetByCondition(req);
         }
 
         /// <summary>
@@ -63,7 +84,7 @@ namespace SystemServiceAPI.Controllers
         [Route("Post")]
         public async Task<object> Post(AddCustomerDto req)
         {
-            return await _customerBo.Post(req);
+            return await customerBo.Post(req);
         }
 
         /// <summary>
@@ -75,7 +96,7 @@ namespace SystemServiceAPI.Controllers
         [Route("Put")]
         public async Task<object> Put(UpdateCustomerDto req)
         {
-            return await _customerBo.Put(req);
+            return await customerBo.Put(req);
         }
 
         /// <summary>
@@ -87,7 +108,7 @@ namespace SystemServiceAPI.Controllers
         [Route("DeleteByID/{customerID}")]
         public async Task<object> DeleteByID(int customerID)
         {
-            return await _customerBo.DeleteByID(customerID);
+            return await customerBo.DeleteByID(customerID);
         }
 
         /// <summary>
@@ -99,7 +120,7 @@ namespace SystemServiceAPI.Controllers
         [Route("DeleteMultiRow")]
         public async Task<object> DeleteMultiRow(DeleteCustomerDto req)
         {
-            return await _customerBo.DeleteMultiRow(req);
+            return await customerBo.DeleteMultiRow(req);
         }
     }
 }

@@ -12,6 +12,8 @@ using SystemServiceAPI.Context;
 using SystemServiceAPI.Helpers;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Bo.Interface;
+using SystemServiceAPICore3.Uow;
+using SystemServiceAPICore3.Uow.Interface;
 
 namespace SystemServiceAPICore3.Infrastructure.Extensions
 {
@@ -60,7 +62,7 @@ namespace SystemServiceAPICore3.Infrastructure.Extensions
             services.AddDbContext<AppDbContext>(options =>
                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
             );
-            //services.AddScoped<IUnitOfWork<EssiHRPUow>, EssiHRPUow>();
+            services.AddScoped<IUnitOfWork<UnitOfWork>, UnitOfWork>();
         }
 
         private static void AddMappingProfile(this IServiceCollection services)

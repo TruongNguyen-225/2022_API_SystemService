@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using SystemServiceAPICore3.Bo.Interface;
+using SystemServiceAPICore3.Uow;
 using SystemServiceAPICore3.Uow.Interface;
 
 namespace SystemServiceAPICore3.Bo
@@ -30,7 +31,7 @@ namespace SystemServiceAPICore3.Bo
         /// </summary>
         /// <param name="serviceProvider">The service provider.</param>
         public BaseBo(IServiceProvider serviceProvider)
-            : base(serviceProvider.GetService<IUnitOfWork<IUnitOfWork>>(), serviceProvider.GetService<IMapper>())
+            : base(serviceProvider.GetService<IUnitOfWork<UnitOfWork>>(), serviceProvider.GetService<IMapper>())
         {
         }
 
