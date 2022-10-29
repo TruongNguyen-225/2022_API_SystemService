@@ -23,6 +23,8 @@ namespace SystemServiceAPICore3.Profiles
             CreateMap<CustomerDto, Customer>();
             CreateMap<AddCustomerDto, CustomerDto>();
 
+            CreateMap<UpdateCustomerDto, Customer>().ReverseMap();
+            CreateMap<UpdateCustomerDto, CustomerDto>().ReverseMap();
         }
     }
 }

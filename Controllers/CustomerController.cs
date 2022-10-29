@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DocumentFormat.OpenXml.Drawing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Threading.Tasks;
+using SystemServiceAPI.Bo;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.CustomerID;
+using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Controllers;
 using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Utilities.Constants;
 
 namespace SystemServiceAPI.Controllers
 {
@@ -48,7 +52,20 @@ namespace SystemServiceAPI.Controllers
         [Route("GetCustomerByID/{customerID}")]
         public async Task<object> GetCustomerByID(int customerID)
         {
-            return await customerBo.GetCustomerByID(customerID);
+            try
+            {
+                var result = await customerBo.GetCustomerByID(customerID);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -72,7 +89,20 @@ namespace SystemServiceAPI.Controllers
         [Route("GetByCondition")]
         public async Task<object> GetByCondition(CustomerRequestDto req)
         {
-            return await customerBo.GetByCondition(req);
+            try
+            {
+                var result = await customerBo.GetByCondition(req);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -81,10 +111,50 @@ namespace SystemServiceAPI.Controllers
         /// <param name="req"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("Post")]
-        public async Task<object> Post(AddCustomerDto req)
+        [Route("InsertCustomer")]
+        public async Task<object> InsertCustomerAsync(AddCustomerDto req)
         {
-            return await customerBo.Post(req);
+            try
+            {
+                int serviceID = req.ServiceID;
+                string code = req.Code;
+                string fullName = req.FullName;
+                int retailID = req.RetailID;
+                int? bankID = req.BankID;
+
+                if (!String.IsNullOrEmpty(code) && !String.IsNullOrEmpty(fullName))
+                {
+                    bool checkCustomerExisted = await customerBo.CheckCustomerIsExist(code, serviceID, retailID);
+                    if (!checkCustomerExisted)
+                    {
+                        var result = await customerBo.InsertCustomer(req);
+                        if (result != null)
+                        {
+                            return Ok(new
+                            {
+                                Result = result,
+                                Messages = String.Empty
+                            });
+                        }
+                    }
+
+                    return BadRequest(new
+                    {
+                        Result = default(object),
+                        Messages = String.Format(CustomerConstants.CUSTOMER_SERVICE_1_IS_EXISTED, code)
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    Result = default(object),
+                    Messages = CustomerConstants.REQUEST_INVALID
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -93,10 +163,52 @@ namespace SystemServiceAPI.Controllers
         /// <param name="req"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("Put")]
-        public async Task<object> Put(UpdateCustomerDto req)
+        [Route("UpdateCustomer")]
+        public async Task<object> UpdateCustomer(UpdateCustomerDto req)
         {
-            return await customerBo.Put(req);
+            try
+            {
+                int customerID = req.CustomerID;
+                int serviceID = req.ServiceID;
+                string code = req.Code;
+                string fullName = req.FullName;
+                int retailID = req.RetailID;
+                int? bankID = req.BankID;
+
+                if (!String.IsNullOrEmpty(code) && !String.IsNullOrEmpty(fullName))
+                {
+                    Customer customer = await customerBo.GetCustomer(customerID);
+                    if (customer != null)
+                    {
+                        bool checkCustomerExisted = await customerBo.CheckCustomerIsExist(code, serviceID, retailID);
+                        if (!checkCustomerExisted)
+                        {
+                            var result = await customerBo.UpdateCustomer(customer, req);
+                            return Ok(new
+                            {
+                                Result = result,
+                                Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                            });
+                        }
+
+                        return BadRequest(new
+                        {
+                            Result = default(object),
+                            Messages = CustomerConstants.CUSTOMER_SERVICE_1_IS_EXISTED
+                        });
+                    }
+                }
+
+                return BadRequest(new
+                {
+                    Result = default(object),
+                    Messages = CustomerConstants.REQUEST_INVALID
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -108,7 +220,20 @@ namespace SystemServiceAPI.Controllers
         [Route("DeleteByID/{customerID}")]
         public async Task<object> DeleteByID(int customerID)
         {
-            return await customerBo.DeleteByID(customerID);
+            try
+            {
+                var result = await customerBo.DeleteByID(customerID);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -120,7 +245,20 @@ namespace SystemServiceAPI.Controllers
         [Route("DeleteMultiRow")]
         public async Task<object> DeleteMultiRow(DeleteCustomerDto req)
         {
-            return await customerBo.DeleteMultiRow(req);
+            try
+            {
+                var result = await customerBo.DeleteMultiRow(req);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }
