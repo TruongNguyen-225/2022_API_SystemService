@@ -12,6 +12,7 @@ using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Dto.Other;
 using SystemServiceAPICore3.Utilities.Constants;
 
 namespace SystemServiceAPI.Bo
@@ -19,9 +20,6 @@ namespace SystemServiceAPI.Bo
     public class CustomerBo : BaseBo<CustomerDto, Customer>, ICustomer
     {
         #region -- Variables --
-
-        private readonly AppDbContext _dbContext;
-
         #endregion
 
         #region -- Properties --
@@ -46,11 +44,10 @@ namespace SystemServiceAPI.Bo
         #region -- Implements --
 
         /// <summary>
-        /// Lấy thông tin khách hàng khi biết customerID
+        /// View vw_Customer to linQ
         /// </summary>
-        /// <param name="customerID"></param>
         /// <returns></returns>
-        public async Task<object> GetCustomerByID(int customerID)
+        public IQueryable<CustomerResponse> GetQueryableViewCustomer()
         {
             var customerQueryable = GetQueryable<Customer>();
             var bankQueryable = GetQueryable<Bank>();
@@ -58,12 +55,13 @@ namespace SystemServiceAPI.Bo
             var serviceQueryable = GetQueryable<Service>();
             var customerRepository = GetRepository<Customer>();
 
-            var result = (from customer in customerQueryable
+            var queryable = (from customer in customerQueryable
                           from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
                           from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
                           from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                          where customer.CustomerID == customerID && customer.IsDelete == false
-                          select new
+                          where customer.IsDelete == false
+                          orderby customer.FullName ascending, customer.DateTimeAdd descending
+                          select new CustomerResponse
                           {
                               STT = 1,
                               ServiceID = service.ServiceID,
@@ -81,7 +79,20 @@ namespace SystemServiceAPI.Bo
                               IsDelete = customer.IsDelete,
                               DateTimeAdd = customer.DateTimeAdd,
                               DateTimeUpdate = customer.DateTimeUpdate
-                          }).FirstOrDefault();
+                          });
+
+            return queryable;
+        }
+
+        /// <summary>
+        /// Lấy thông tin khách hàng khi biết customerID
+        /// </summary>
+        /// <param name="customerID"></param>
+        /// <returns></returns>
+        public async Task<object> GetCustomerByID(int customerID)
+        {
+            var customerQueryable = GetQueryableViewCustomer();
+            var result = customerQueryable.Where(x => x.CustomerID == customerID).FirstOrDefault();
            
             return await Task.FromResult(result);
         }
@@ -108,36 +119,8 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<object> GetCustomerByServiceID(int serviceID)
         {
-            var customerQueryable = GetQueryable<Customer>();
-            var bankQueryable = GetQueryable<Bank>();
-            var retailQueryable = GetQueryable<Retail>();
-            var serviceQueryable = GetQueryable<Service>();
-            var customerRepository = GetRepository<Customer>();
-
-            var result = (from customer in customerQueryable
-                          from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
-                          from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
-                          from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                          where customer.ServiceID == serviceID && customer.IsDelete == false
-                          select new
-                          {
-                              STT = 1,
-                              ServiceID = service.ServiceID,
-                              ServiceName = service.ServiceName,
-                              BankID = bank.BankID,
-                              BankName = bank.ShortName,
-                              CustomerID = customer.CustomerID,
-                              RetailID = retail.RetailID,
-                              RetailName = retail.RetailName,
-                              FullName = customer.FullName,
-                              Code = customer.Code,
-                              VillageID = customer.VillageID,
-                              Hotline = customer.Hotline,
-                              Status = customer.IsDelete ? "Đã xoá" : "Đang hoạt động",
-                              IsDelete = customer.IsDelete,
-                              DateTimeAdd = customer.DateTimeAdd,
-                              DateTimeUpdate = customer.DateTimeUpdate
-                          });
+            var customerQueryable = GetQueryableViewCustomer();
+            var result = customerQueryable.Where(x => x.ServiceID == serviceID);
 
             if (result.Any())
             {
@@ -159,117 +142,28 @@ namespace SystemServiceAPI.Bo
             int? retailID = req.RetailID;
             int? serviceID = req.ServiceID;
 
-            var customerQueryable = GetQueryable<Customer>();
-            var bankQueryable = GetQueryable<Bank>();
-            var retailQueryable = GetQueryable<Retail>();
-            var serviceQueryable = GetQueryable<Service>();
-            var customerRepository = GetRepository<Customer>();
+            var customerQueryable = GetQueryableViewCustomer();
+            IQueryable<CustomerResponse> result = null;
 
             if (retailID.HasValue && serviceID.HasValue)
             {
-                var result = (from customer in customerQueryable
-                              from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
-                              from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
-                              from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                              where customer.ServiceID == serviceID.Value && customer.RetailID == retailID.Value && customer.IsDelete == false
-                              orderby customer.DateTimeAdd, customer.FullName descending
-                              select new
-                              {
-                                  STT = 1,
-                                  ServiceID = service.ServiceID,
-                                  ServiceName = service.ServiceName,
-                                  BankID = bank.BankID,
-                                  BankName = bank.ShortName,
-                                  CustomerID = customer.CustomerID,
-                                  RetailID = retail.RetailID,
-                                  RetailName = retail.RetailName,
-                                  FullName = customer.FullName,
-                                  Code = customer.Code,
-                                  VillageID = customer.VillageID,
-                                  Hotline = customer.Hotline,
-                                  Status = customer.IsDelete ? "Đã xoá" : "Đang hoạt động",
-                                  IsDelete = customer.IsDelete,
-                                  DateTimeAdd = customer.DateTimeAdd,
-                                  DateTimeUpdate = customer.DateTimeUpdate
-                              });
-
-                if (result.Any())
-                {
-                    return await Task.FromResult(result.ToList());
-                }
-
-                return await Task.FromResult(default(object));
+                result = customerQueryable.Where(customer => customer.ServiceID == serviceID.Value && customer.RetailID == retailID.Value);
             }
             else if (retailID.HasValue && !serviceID.HasValue)
             {
-                var result = (from customer in customerQueryable
-                              from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
-                              from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
-                              from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                              where customer.RetailID == retailID.Value && customer.IsDelete == false
-                              orderby customer.DateTimeAdd, customer.FullName descending
-                              select new
-                              {
-                                  STT = 1,
-                                  ServiceID = service.ServiceID,
-                                  ServiceName = service.ServiceName,
-                                  BankID = bank.BankID,
-                                  BankName = bank.ShortName,
-                                  CustomerID = customer.CustomerID,
-                                  RetailID = retail.RetailID,
-                                  RetailName = retail.RetailName,
-                                  FullName = customer.FullName,
-                                  Code = customer.Code,
-                                  VillageID = customer.VillageID,
-                                  Hotline = customer.Hotline,
-                                  Status = customer.IsDelete ? "Đã xoá" : "Đang hoạt động",
-                                  IsDelete = customer.IsDelete,
-                                  DateTimeAdd = customer.DateTimeAdd,
-                                  DateTimeUpdate = customer.DateTimeUpdate
-                              });
-
-                if (result.Any())
-                {
-                    return await Task.FromResult(result.ToList());
-                }
-
-                return await Task.FromResult(default(object));
+                result = customerQueryable.Where(customer => customer.RetailID == retailID.Value);
             }
             else
             {
-                var result = (from customer in customerQueryable
-                              from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
-                              from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
-                              from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                              where customer.ServiceID == serviceID.Value && customer.IsDelete == false
-                              orderby customer.DateTimeAdd, customer.FullName descending
-                              select new
-                              {
-                                  STT = 1,
-                                  ServiceID = service.ServiceID,
-                                  ServiceName = service.ServiceName,
-                                  BankID = bank.BankID,
-                                  BankName = bank.ShortName,
-                                  CustomerID = customer.CustomerID,
-                                  RetailID = retail.RetailID,
-                                  RetailName = retail.RetailName,
-                                  FullName = customer.FullName,
-                                  Code = customer.Code,
-                                  VillageID = customer.VillageID,
-                                  Hotline = customer.Hotline,
-                                  Status = customer.IsDelete ? "Đã xoá" : "Đang hoạt động",
-                                  IsDelete = customer.IsDelete,
-                                  DateTimeAdd = customer.DateTimeAdd,
-                                  DateTimeUpdate = customer.DateTimeUpdate
-                              });
-
-                if (result.Any())
-                {
-                    return await Task.FromResult(result.ToList());
-                }
-
-                return await Task.FromResult(default(object));
+                result = customerQueryable.Where(customer => customer.ServiceID == serviceID.Value);
             }
+
+            if (result.Any())
+            {
+                return await Task.FromResult(result.ToList());
+            }
+
+            return await Task.FromResult(default(object));
         }
 
         /// <summary>
@@ -285,11 +179,8 @@ namespace SystemServiceAPI.Bo
             int retailID = req.RetailID;
             int? bankID = req.BankID;
 
-            var customerQueryable = GetQueryable<Customer>();
             var bankQueryable = GetQueryable<Bank>();
             var retailQueryable = GetQueryable<Retail>();
-            var serviceQueryable = GetQueryable<Service>();
-            var customerRepository = GetRepository<Customer>();
 
             var destination = mapper.Map<AddCustomerDto, CustomerDto>(req);
             var retail = retailQueryable.Where(x => x.RetailID == retailID).FirstOrDefault();
@@ -308,7 +199,6 @@ namespace SystemServiceAPI.Bo
             }
 
             destination.DateTimeAdd = DateTime.Now;
-
             destination = Insert(destination);
 
             return await Task.FromResult(destination);
@@ -323,9 +213,9 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<bool> CheckCustomerIsExist(string code, int serviceID, int retailID)
         {
-            var customerQueryable = GetQueryable<Customer>();
+            var customerQueryable = GetQueryableViewCustomer();
             var customerByCode = await customerQueryable
-                    .Where(x => x.Code == code && x.RetailID == retailID && x.ServiceID == serviceID && x.IsDelete == false)
+                    .Where(x => x.Code == code && x.RetailID == retailID && x.ServiceID == serviceID)
                     .FirstOrDefaultAsync();
 
             if (customerByCode != null)
@@ -344,7 +234,7 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<bool> CheckCustomerIsExistByCode(string code, int retailID)
         {
-            var customerQueryable = GetQueryable<Customer>();
+            var customerQueryable = GetQueryableViewCustomer();
             var customer = customerQueryable
                 .Where(x => x.RetailID == retailID && (x.Code == code || x.Code == (CustomerConstants.DISTRICT_CODE_ELECTRIC + code )))
                 .FirstOrDefault();
@@ -371,10 +261,8 @@ namespace SystemServiceAPI.Bo
             int customerID = req.CustomerID;
             int? bankID = req.BankID;
 
-            var customerQueryable = GetQueryable<Customer>();
             var bankQueryable = GetQueryable<Bank>();
             var retailQueryable = GetQueryable<Retail>();
-            var serviceQueryable = GetQueryable<Service>();
             var customerRepository = GetRepository<Customer>();
 
             customer = mapper.Map<UpdateCustomerDto, Customer>(req, customer);

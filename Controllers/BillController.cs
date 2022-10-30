@@ -1,127 +1,242 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
+using SystemServiceAPICore3.Controllers;
+using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Utilities.Constants;
 namespace SystemServiceAPI.Controllers
 {
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    [Authorize]
-    public class BillController : ControllerBase
+    //[Authorize]
+    public class BillController : BaseController<MonthlyTransactionDto>
     {
-        private readonly IBillBo _billBo;
-        public BillController(IBillBo billBo)
+        #region -- Variables --
+
+        private readonly IBillBo billBo;
+
+        #endregion
+
+        #region -- Properties --
+        #endregion
+
+        #region -- Constructors --
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DashboardController"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        public BillController(IServiceProvider serviceProvider, IBillBo bilBo)
+            : base(serviceProvider)
         {
-            _billBo = billBo;
+            this.billBo = bilBo;
         }
 
+        #endregion
+
+        /// <summary>
+        /// Danh sách giao dịch theo dịch vụ
+        /// </summary>
+        /// <param name="serviceID"></param>
+        /// <returns></returns>
         [HttpGet]
-        [Route("GetByServiceID/{serviceID}")]
-        public async Task<object> GetByServiceID(int serviceID)
+        [Route("GetTransactionByServiceID/{serviceID}")]
+        public async Task<object> GetTransactionByServiceID(int serviceID)
         {
             try
             {
-                var result =  await _billBo.GetByServiceID(serviceID);
-                if(result.Count > 0)
+                var result = await billBo.GetTransactionByServiceID(serviceID);
+
+                return Ok(new
                 {
-                    return Ok(result);
-                }
-
-                return NoContent();
-
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
             }
-            catch (Exception ex)
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Danh sách giao dịch theo điều kiện
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("GetTransactionByMonth")]
+        public async Task<object> GetTransactionByMonthAsync(BillFilterDto req)
+        {
+            try
+            {
+                var result = await billBo.GetTransactionByMonth(req);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
             {
                 throw;
             }
         }
 
         [HttpPost]
-        [Route("GetByMonth")]
-        public async Task<object> GetByMonth(BillFilterDto req)
+        [Route("InsertTransaction")]
+        public async Task<object> InsertTransactionAsync(BillInsertDto request)
         {
-            return await _billBo.GetByMonth(req);
-        }
-
-        [HttpPost]
-        [Route("Post")]
-        public async Task<object> Post(BillRequestDto req)
-        {
-            int serviceID = req.ServiceID;
-            string code = req.Code;
+            int serviceID = request.ServiceID;
+            string code = request.Code;
 
             if (serviceID == 1)
             {
-                bool isExisted = await _billBo.CheckBeforeAddBillElectricity(serviceID, code);
-                if(isExisted)
+                bool isExisted = await billBo.CheckBeforeAddBillElectricity(serviceID, code);
+
+                if (isExisted)
                 {
-                    return await Task.FromResult(default(object));
+                    return Ok(new
+                    {
+                        Result = default(object),
+                        Messages = String.Format(StatusConstants.IS_EXISTED, "Giao dịch ")
+                    });
                 }
             }
 
-            var result = _billBo.Post(req);
-            if(result != null)
+            var result = await billBo.InsertTransactionAsync(request);
+
+            return Ok(new
             {
-                return Ok(result);
+                Result = result,
+                Messages = result == null ? StatusConstants.UPDATE_FAIL : StatusConstants.SUCCESS
+            });
+        }
+
+        /// <summary>
+        /// Chỉnh sửa giao dịch
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("UpdateTransaction")]
+        public async Task<object> UpdateTransactionAsync(BillUpdateDto req)
+        {
+            try
+            {
+                var result = await billBo.UpdateTransactionAsync(req);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
             }
-
-            return NoContent();
+            catch
+            {
+                throw;
+            }
         }
 
+        /// <summary>
+        /// Xoá giao dịch bới billID
+        /// </summary>
+        /// <param name="billID"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("Put")]
-        public async Task<object> Put(BillUpdatetDto req)
+        [Route("DeleteTransactionByID/{billID}")]
+        public async Task<object> DeleteTransactionByIDAsync(int billID)
         {
-            return await _billBo.Put(req);
+            try
+            {
+                var result = await billBo.DeleteTransactionByBillID(billID);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
+        /// <summary>
+        /// Xoá nhiều giao dịch
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("DeleteByID/{billID}")]
-        public async Task<object> DeleteByID(int billID)
+        [Route("DeleteTransactions")]
+        public async Task<object> DeleteTransactionsAsync(BillDeleteDto request)
         {
-            return await _billBo.DeleteByID(billID);
-        }
+            try
+            {
+                var result = await billBo.DeleteTransactionsAsync(request);
 
-        [HttpPost]
-        [Route("DeleteMultiRow")]
-        public async Task<object> DeleteMultiRow(BillDeleteDto req)
-        {
-            return await _billBo.DeleteMultiRow(req);
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         [HttpGet]
-        [Route("Print/{billID}")]
-        public async Task<FileResult> Print(int billID)
+        [Route("PrintTransaction/{billID}")]
+        public async Task<FileResult> PrintTransactionAsync(int billID)
         {
-            byte[] res = await _billBo.Print(billID);
-            if(res != null)
+            try
             {
-                return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
-            }
+                var result = await billBo.Print(billID);
+                if (result != null)
+                {
+                    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                }
 
-            return null;
-            //return await _billBo.Print(billID);
+                return null;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
+        /// <summary>
+        /// In nhiều giao dịch cùng lúc
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("PrintMultiRow")]
-        public async Task<object> PrintMultiRow(BillPrintAllDto req)
+        [Route("PrintTransactions")]
+        public async Task<object> PrintTransactionsAsync(BillPrintTransactionsDto request)
         {
-            return await _billBo.PrintMultiRow(req);
+            try
+            {
+                var result = await billBo.PrintMultiRow(request);
+
+                //if (result != null)
+                //{
+                //    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                //}
+
+                return null;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }
-

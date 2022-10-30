@@ -47,7 +47,7 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> Post(BillRequestDto req)
+        public async Task<ResponseResults> Post(BillInsertDto req)
         {
             ResponseResults response = new ResponseResults();
             try
@@ -102,7 +102,7 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> Put(BillUpdatetDto req)
+        public async Task<ResponseResults> Put(BillUpdateDto req)
         {
             ResponseResults response = new ResponseResults();
             try
@@ -283,7 +283,7 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> PrintMultiRow(BillPrintAllDto req)
+        public async Task<ResponseResults> PrintMultiRow(BillPrintTransactionsDto req)
         {
             ResponseResults response = new ResponseResults();
 

@@ -32,14 +32,14 @@ namespace SystemServiceAPI.Controllers
 
         [HttpPost]
         [Route("Post")]
-        public async Task<object> Post(BillRequestDto req)
+        public async Task<object> Post(BillInsertDto req)
         {
             return await _billBo.Post(req);
         }
 
         [HttpPost]
         [Route("Put")]
-        public async Task<object> Put(BillUpdatetDto req)
+        public async Task<object> Put(BillUpdateDto req)
         {
             return await _billBo.Put(req);
         }
@@ -60,7 +60,7 @@ namespace SystemServiceAPI.Controllers
 
         [HttpPost]
         [Route("PrintMultiRow")]
-        public async Task<object> PrintMultiRow(BillPrintAllDto req)
+        public async Task<object> PrintMultiRow(BillPrintTransactionsDto req)
         {
             return await _billBo.PrintMultiRow(req);
         }

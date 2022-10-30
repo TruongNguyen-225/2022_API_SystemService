@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Dto;
+using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Dto.CustomerID;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Dto;
@@ -25,6 +26,14 @@ namespace SystemServiceAPICore3.Profiles
 
             CreateMap<UpdateCustomerDto, Customer>().ReverseMap();
             CreateMap<UpdateCustomerDto, CustomerDto>().ReverseMap();
+
+            //MonthlyTransaction
+            CreateMap<MonthlyTransaction, MonthlyTransactionDto>();
+            CreateMap<MonthlyTransactionDto, MonthlyTransaction>();
+
+            CreateMap<BillInsertDto, MonthlyTransaction>().ReverseMap();
+            CreateMap<BillUpdateDto, MonthlyTransaction>().ReverseMap();
+
         }
     }
 }

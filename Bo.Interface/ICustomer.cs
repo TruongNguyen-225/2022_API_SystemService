@@ -1,14 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.CustomerID;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
+using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPI.Bo.Interface
 {
     public interface ICustomer
     {
+        IQueryable<CustomerResponse> GetQueryableViewCustomer();
+
         Task<object> GetCustomerByID(int customerID);
 
         Task<Customer> GetCustomer(int customerID);
