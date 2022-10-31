@@ -48,12 +48,11 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public IQueryable<MonthlyTransactionResponse> GetQueryableViewMonthlyTransaction()
         {
-            var customerQueryable = customerBo.GetQueryableViewCustomer();
-            var list = customerQueryable.ToList();
+            var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
 
             var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionQueryable
-                                                   from customer in customerQueryable.
+                                                   from customer in viewCustomerQueryable.
                                                    Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
                                                    orderby transaction.ID descending
                                                    select new MonthlyTransactionResponse
@@ -77,7 +76,6 @@ namespace SystemServiceAPI.Bo
                                                        DateTimeAdd = transaction.DateTimeAdd
                                                    });
 
-            var lis1 = viewMonthlyTransactionQueryable.ToList();
             return viewMonthlyTransactionQueryable;
         }
 
@@ -109,24 +107,25 @@ namespace SystemServiceAPI.Bo
         /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
-        public async Task<object> GetTransactionByMonth(BillFilterDto req)
+        public object GetTransactionByMonth(BillFilterDto req)
         {
             int month = DateTime.Now.Month;
             int year = DateTime.Now.Year;
             int serviceID = req.ServiceID;
             int monthRequest = req.Month;
 
-            var viewMonthyTransactionQueryable =  GetQueryableViewMonthlyTransaction();
+            var viewMonthyTransactionQueryable = GetQueryableViewMonthlyTransaction();
             var queryable = viewMonthyTransactionQueryable
                 .Where(x => x.ServiceID == serviceID && x.Month == monthRequest && x.Year == year)
                 .OrderByDescending(x => x.DateTimeAdd);
 
             if (queryable.Any())
             {
-                return await Task.FromResult(queryable.ToList());
+                var result = queryable.ToList();
+                return result;
             }
 
-            return await Task.FromResult(default(object));
+            return default(object);
         }
 
         /// <summary>

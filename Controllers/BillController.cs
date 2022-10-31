@@ -70,11 +70,11 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("GetTransactionByMonth")]
-        public async Task<object> GetTransactionByMonthAsync(BillFilterDto req)
+        public object GetTransactionByMonth(BillFilterDto req)
         {
             try
             {
-                var result = await billBo.GetTransactionByMonth(req);
+                var result = billBo.GetTransactionByMonth(req);
 
                 return Ok(new
                 {

@@ -16,7 +16,7 @@ namespace SystemServiceAPI.Bo.Interface
 
         Task<object> GetTransactionByServiceID(int serviceID);
 
-        Task<object> GetTransactionByMonth(BillFilterDto req);
+        object GetTransactionByMonth(BillFilterDto req);
 
         Task<object> InsertTransactionAsync(BillInsertDto req);
 
