@@ -49,7 +49,7 @@ namespace SystemServiceAPI.Dto.BillDto
     public class BillFilterDto
     {
         public int ServiceID { get; set; }
-        public int Month { get; set; }
+        public int? RetailID { get; set; }
     }
 
     public class BillDeleteDto

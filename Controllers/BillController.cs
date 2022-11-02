@@ -69,12 +69,12 @@ namespace SystemServiceAPI.Controllers
         /// <param name="req"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("GetTransactionByMonth")]
-        public object GetTransactionByMonth(BillFilterDto req)
+        [Route("GetTransactionByConditions")]
+        public object GetTransactionByConditions(BillFilterDto req)
         {
             try
             {
-                var result = billBo.GetTransactionByMonth(req);
+                var result = billBo.GetTransactionByConditions(req);
 
                 return Ok(new
                 {

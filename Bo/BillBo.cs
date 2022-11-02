@@ -48,13 +48,17 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public IQueryable<MonthlyTransactionResponse> GetQueryableViewMonthlyTransaction()
         {
+            int month = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
+
             var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
+            var monthlyTransactionCurrentMonth = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year);
 
-            var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionQueryable
+            var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionCurrentMonth
                                                    from customer in viewCustomerQueryable.
                                                    Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
-                                                   orderby transaction.ID descending
+                                                   //orderby transaction.ID descending
                                                    select new MonthlyTransactionResponse
                                                    {
                                                        STT = 1,
@@ -86,12 +90,9 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<object> GetTransactionByServiceID(int serviceID)
         {
-            int month = DateTime.Now.Month;
-            int year = DateTime.Now.Year;
-
             var viewMonthyTransactionQueryable =  GetQueryableViewMonthlyTransaction();
             var queryable = viewMonthyTransactionQueryable
-                .Where(x => x.ServiceID == serviceID && x.Month == month && x.Year == year)
+                .Where(x => x.ServiceID == serviceID )
                 .OrderByDescending(x => x.DateTimeAdd);;
 
             if (queryable.Any())
@@ -103,20 +104,18 @@ namespace SystemServiceAPI.Bo
         }
 
         /// <summary>
-        /// Danh sách giao dịch với tháng + dịch vụ
+        /// Danh sách giao dịch với chi nhánh + dịch vụ
         /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
-        public object GetTransactionByMonth(BillFilterDto req)
+        public object GetTransactionByConditions(BillFilterDto req)
         {
-            int month = DateTime.Now.Month;
-            int year = DateTime.Now.Year;
             int serviceID = req.ServiceID;
-            int monthRequest = req.Month;
+            int? retailID = req.RetailID;
 
             var viewMonthyTransactionQueryable = GetQueryableViewMonthlyTransaction();
             var queryable = viewMonthyTransactionQueryable
-                .Where(x => x.ServiceID == serviceID && x.Month == monthRequest && x.Year == year)
+                .Where(x => x.ServiceID == serviceID && (retailID.HasValue ?  x.RetailID == retailID : true))
                 .OrderByDescending(x => x.DateTimeAdd);
 
             if (queryable.Any())
