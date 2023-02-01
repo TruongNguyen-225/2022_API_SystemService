@@ -17,6 +17,7 @@
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.17.1" />
     <PackageReference Include="Npgsql" Version="6.0.7" />
     <PackageReference Include="MySqlConnector" Version="2.1.13" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="DocumentFormat.OpenXml" />
@@ -38,6 +39,7 @@
     <None Remove="MySqlConnector" />
     <None Remove="Context\" />
     <None Remove="Utilities\Constants\" />
+    <None Remove="HtmlAgilityPack" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\Constant\" />

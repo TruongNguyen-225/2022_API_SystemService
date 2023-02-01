@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 using DocumentFormat.OpenXml.Drawing;
+using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Context;
@@ -66,44 +67,32 @@ namespace SystemServiceAPI.Bo
         {
             int money = 0;
             string code = String.Empty;
-
             XmlDocument xmltest = new XmlDocument();
+            Dictionary<string, int> result = new Dictionary<string, int>();
+
             foreach (var item in listCode)
             {
                 code = item;
                 string URL = $"https://www.cskh.evnspc.vn/ThanhToanTienDien/XuLyThanhToanTrucTuyenTienDien?MaKhachHang={code}";
                 string html = await GetWebContent(URL);
-                //xmltest.LoadXml(html);
 
-                //XmlNodeList elemlist = xmltest.GetElementsByTagName("p");
-                //string result = elemlist[0].InnerXml;
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(html);
+
+                var element = doc.DocumentNode.SelectNodes("//div[@class='customer-info']");
+                var temp = "";
+                if (element != null)
+                {
+                    var text = element.FirstOrDefault().InnerText.Trim().Replace("\n", "").Replace("\r", "");
+                    var search = "Tổng tiền:";
+                    temp = text.Substring(text.IndexOf(search) + search.Length);
+                    temp = temp.Split(' ')[0].Replace(".","");
+                    money = DataAccess.CorrectValue(temp, 0);
+                    result.Add(code, money);
+                }
             }
 
-            //string html = @"<div>
-            //                <div>
-            //                        <p>
-            //                            Id hóa đơn: 1194407175
-            //                            Loại hóa đơn: Tiền điện
-            //                            Tiền nợ: 163.664 đồng
-            //                            Thuế nợ: 16.366 đồng
-            //                            Tổng tiền: 180.030 đồng
-            //                        </p>
-            //                </div>
-            //                <div>
-            //                    <p ><span>Chọn nhà cung cấp</span></p>
-            //                    <ul>
-            //                        <li><a></a></li>
-            //                    </ul>
-            //                </div>
-            //            </div>";
-
-            //string html = "<item><name>wrench</name></item>";
-            //xmltest.LoadXml(html);
-
-            //XmlNodeList elemlist = xmltest.GetElementsByTagName("p");
-            //string result = elemlist[0].InnerXml;
-
-            return new Dictionary<string, int>();
+            return await Task.FromResult(result);
         }
 
         // Tải về trang web và trả về chuỗi nội dung
