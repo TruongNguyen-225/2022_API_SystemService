@@ -32,8 +32,10 @@ namespace SystemServiceAPICore3.Profiles
             CreateMap<MonthlyTransactionDto, MonthlyTransaction>();
 
             CreateMap<BillInsertDto, MonthlyTransaction>().ReverseMap();
-            CreateMap<BillUpdateDto, MonthlyTransaction>().ReverseMap();
+            CreateMap<BillInsertDto, MonthlyTransactionTemp>().ReverseMap();
 
+            CreateMap<BillUpdateDto, MonthlyTransaction>().ReverseMap();
+            CreateMap<BillUpdateDto, MonthlyTransactionTemp>().ReverseMap();
         }
     }
 }

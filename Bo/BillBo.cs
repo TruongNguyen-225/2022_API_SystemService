@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Context;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
-using SystemServiceAPI.Entities.View;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
 using SystemServiceAPICore3.Dto.Other;
 using SystemServiceAPICore3.Utilities;
+using SystemServiceAPICore3.Utilities.Constants;
 
 namespace SystemServiceAPI.Bo
 {
@@ -46,31 +42,32 @@ namespace SystemServiceAPI.Bo
         /// </summary>
         /// <param name="serviceID"></param>
         /// <returns></returns>
-        public IQueryable<MonthlyTransactionResponse> GetQueryableViewMonthlyTransaction()
+        public IQueryable<MonthlyTransactionResponse> GetQueryableViewMonthlyTransaction(int? month, int? year)
         {
-            int month = DateTime.Now.Month;
-            int year = DateTime.Now.Year;
+            int currentMonth = DateTime.Now.Month;
+            int currentYear = DateTime.Now.Year;
 
             var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
-            var monthlyTransactionCurrentMonth = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year);
+            //var monthlyTransactionCurrentMonth = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year);
 
-            var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionCurrentMonth
+            var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionQueryable
                                                    from customer in viewCustomerQueryable.
                                                    Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
+                                                   where transaction.DateTimeAdd.Month == (month.HasValue ? month : currentMonth) && transaction.DateTimeAdd.Year == (year.HasValue ? year : currentYear)
                                                    //orderby transaction.ID descending
                                                    select new MonthlyTransactionResponse
                                                    {
                                                        STT = 1,
                                                        ID = transaction.ID,
-                                                       ServiceID = transaction.ServiceID,
+                                                       ServiceID = customer.ServiceID,
                                                        ServiceName = customer.ServiceName,
-                                                       CustomerID = transaction.CustomerID,
+                                                       CustomerID = customer.CustomerID,
                                                        FullName = customer.FullName,
                                                        Code = customer.Code,
                                                        RetailID = customer.RetailID,
                                                        RetailName = customer.RetailName,
-                                                       BankID = transaction.BankID,
+                                                       BankID = customer.BankID,
                                                        BankName = customer.BankName,
                                                        Money = transaction.Money,
                                                        Postage = transaction.Postage,
@@ -90,10 +87,10 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<object> GetTransactionByServiceID(int serviceID)
         {
-            var viewMonthyTransactionQueryable =  GetQueryableViewMonthlyTransaction();
+            var viewMonthyTransactionQueryable =  GetQueryableViewMonthlyTransaction(null, null);
             var queryable = viewMonthyTransactionQueryable
                 .Where(x => x.ServiceID == serviceID )
-                .OrderByDescending(x => x.DateTimeAdd);;
+                .OrderByDescending(x => x.DateTimeAdd);
 
             if (queryable.Any())
             {
@@ -108,14 +105,16 @@ namespace SystemServiceAPI.Bo
         /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
-        public object GetTransactionByConditions(BillFilterDto req)
+        public List<MonthlyTransactionResponse> GetTransactionByConditions(BillFilterDto req)
         {
             int serviceID = req.ServiceID;
             int? retailID = req.RetailID;
+            int? month = req.Month;
+            int? year = req.Year;
 
-            var viewMonthyTransactionQueryable = GetQueryableViewMonthlyTransaction();
+            var viewMonthyTransactionQueryable = GetQueryableViewMonthlyTransaction(month, year);
             var queryable = viewMonthyTransactionQueryable
-                .Where(x => x.ServiceID == serviceID && (retailID.HasValue ?  x.RetailID == retailID : true))
+                .Where(x => x.ServiceID == serviceID && (retailID.HasValue ?  x.RetailID == retailID : true) && (month.HasValue ? x.Month == month : true) && (year.HasValue ? x.Year == year : true))
                 .OrderByDescending(x => x.DateTimeAdd);
 
             if (queryable.Any())
@@ -124,7 +123,7 @@ namespace SystemServiceAPI.Bo
                 return result;
             }
 
-            return default(object);
+            return new List<MonthlyTransactionResponse>();
         }
 
         /// <summary>
@@ -177,27 +176,27 @@ namespace SystemServiceAPI.Bo
         /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
-        public async Task<object> UpdateTransactionAsync(BillUpdateDto req)
+        public object UpdateTransactionAsync(BillUpdateDto req)
         {
             int month = DateTime.Now.Month;
             int year = DateTime.Now.Year;
             var monthlyTransactionRepository = GetRepository<MonthlyTransaction>();
+            var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
 
-            var viewMonthlyTransactionQueryable = GetQueryableViewMonthlyTransaction();
-            var transaction = viewMonthlyTransactionQueryable
-                .Where(x => x.ID == req.ID && x.DateTimeAdd.Value.Month == month && x.DateTimeAdd.Value.Year == year)
+            var transaction = monthlyTransactionQueryable
+                .Where(x => x.ID == req.ID && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year)
                 .FirstOrDefault();
 
             if(transaction != null)
             {
-                var target = mapper.Map<BillUpdateDto, MonthlyTransaction>(req);
-                target.DateTimeUpdate = DateTime.Now;
-                monthlyTransactionRepository.Update(target, true);
+                transaction = mapper.Map<BillUpdateDto, MonthlyTransaction>(req, transaction);
+                transaction.DateTimeUpdate = DateTime.Now;
+                monthlyTransactionRepository.Update(transaction, true);
 
-                return await Task.FromResult(target);
+                return transaction;
             }
 
-            return await Task.FromResult(default(object));
+            return default(object);
         }
 
         /// <summary>
@@ -281,12 +280,14 @@ namespace SystemServiceAPI.Bo
         {
             try
             {
-                var viewMonthlyTransactionQueryable = GetQueryableViewMonthlyTransaction();
-                var dataBill = viewMonthlyTransactionQueryable.Where(x => x.ID == billID);
+                int month = DateTime.Now.Month;
+                int year = DateTime.Now.Year;
+
+                var viewMonthlyTransactionQueryable = GetQueryableViewMonthlyTransaction(month, year);
+                var dataBill = viewMonthlyTransactionQueryable.Where(x => x.ID == billID && x.Month == month && x.Year == year);
 
                 if(dataBill.Any())
                 {
-
                     DataTable table = Utility.ToDataTable(dataBill.ToList());
                     byte[] byteArray = ExcelUtility.CreateAndWriteBillExcel(table);
 
@@ -301,9 +302,57 @@ namespace SystemServiceAPI.Bo
             }
         }
 
-        public async Task<object> PrintMultiRow(BillPrintTransactionsDto req)
+        public byte[] PrintMultiRow(BillPrintTransactionsDto req)
         {
-            return await Task.FromResult(default(object));
+            var tblCustomer = GetQueryable<Customer>();
+            var tblBillTemp = GetQueryable<MonthlyTransaction>();
+
+            List<string> listID = req.ListBillID.Split(";").ToList();
+
+            var listBillTemp = (from temp in tblBillTemp
+                                from customer in tblCustomer.Where(x => x.CustomerID == temp.CustomerID)
+                                where temp.DateTimeAdd.Month == req.Month && temp.DateTimeAdd.Year == req.Year &&
+                                    temp.ServiceID == req.ServiceID && listID.Contains(temp.ID.ToString())
+                                orderby temp.RetailID
+                                select new
+                                {
+                                    FullName = customer.FullName,
+                                    Code = customer.Code,
+                                    Money = temp.Money,
+                                    Postage = temp.Postage,
+                                    Total = temp.Total
+                                }).ToList();
+
+            DataTable dataTable = Utility.ToDataTable(listBillTemp);
+
+            DateTime? fromDate = new DateTime(req.Year, req.Month, 1);
+            DateTime? toDate = new DateTime(req.Year, req.Month, 20);
+
+            FileNameParams fileNameParams = new FileNameParams
+            {
+                FileName = ExportExcelConstants.FILE_NAME_LIST_ELECTRIC_BILL,
+                FromDate = fromDate.ConvertDateTimeToString103(),
+                ToDate = toDate.ConvertDateTimeToString103(),
+                TimeExport = toDate.Value,
+            };
+
+            CellParams cellParams = new CellParams
+            {
+                MaxColumn = 20,
+                StartColumn = 3,
+                StartRow = 7,
+            };
+
+            ExcelParamDefault excelParamDefault = new ExcelParamDefault
+            {
+                fileNameParam = null,
+                cellParam = cellParams
+            };
+
+            string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+            byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
+
+            return excel;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BillDto;
+using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Controllers;
 using SystemServiceAPICore3.Dto;
 using SystemServiceAPICore3.Utilities.Constants;
@@ -125,11 +126,11 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("UpdateTransaction")]
-        public async Task<object> UpdateTransactionAsync(BillUpdateDto req)
+        public object UpdateTransactionAsync(BillUpdateDto req)
         {
             try
             {
-                var result = await billBo.UpdateTransactionAsync(req);
+                var result = billBo.UpdateTransactionAsync(req);
 
                 return Ok(new
                 {
@@ -218,18 +219,26 @@ namespace SystemServiceAPI.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         [Route("PrintTransactions")]
-        public async Task<object> PrintTransactionsAsync(BillPrintTransactionsDto request)
+        public async Task<object> PrintTransactionsAsync(/*BillPrintTransactionsDto request*/)
         {
             try
             {
-                var result = await billBo.PrintMultiRow(request);
+                BillPrintTransactionsDto request = new BillPrintTransactionsDto
+                {
+                    ServiceID = 1,
+                    ListBillID = "4476;4477;4478;4480;4483;4484;4485;4486;4487;4488;4489;4490;4491;4492;4493;4494;4495;4496;4497;4498;4499;4500;4501;4502;4503;4504;4505;4506;4507;4508;4509;4510;4511;4512;4513;4514;4515;4516;4517;4518;4519;4520;4521;4522;4523;4524;4525;4526;4527;4528;4529;4530;4531;4532;4533;4534;4535;4536;4537",
+                    Month = 1,
+                    Year = 2023
+                };
 
-                //if (result != null)
-                //{
-                //    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
-                //}
+                var result = billBo.PrintMultiRow(request);
+
+                if (result != null)
+                {
+                    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                }
 
                 return null;
             }

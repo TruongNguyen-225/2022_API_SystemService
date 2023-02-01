@@ -37,7 +37,7 @@ namespace SystemServiceAPI.Dto.BillDto
 
         public int Total { get; set; }
 
-        public DateTime? DateTimeAdd { get; set; }
+        public DateTime? DateTimeUpdate { get; set; }
     }
 
     public class BillSearchDto
@@ -50,6 +50,8 @@ namespace SystemServiceAPI.Dto.BillDto
     {
         public int ServiceID { get; set; }
         public int? RetailID { get; set; }
+        public int? Month { get; set; }
+        public int? Year { get; set; }
     }
 
     public class BillDeleteDto
@@ -62,9 +64,12 @@ namespace SystemServiceAPI.Dto.BillDto
 
     public class BillPrintTransactionsDto
     {
-        public int ServiceID { get; set; }
+        public int? ServiceID { get; set; }
+
         public string ListBillID { get; set; } = String.Empty;
+
         public int Month { get; set; }
+
         public int Year { get; set; }
     }
 }

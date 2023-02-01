@@ -33,14 +33,19 @@ namespace SystemServiceAPICore3.Infrastructure.Extensions
 
         public static void AddControllersService(this IServiceCollection services)
         {
-            services.AddControllers().AddJsonOptions(x =>
-            {
-                // serialize enums as strings in api responses (e.g. Role)
-                x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            //services.AddControllers().AddJsonOptions(x =>
+            //{
+            //    // serialize enums as strings in api responses (e.g. Role)
+            //    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 
-                // ignore omitted parameters on models to enable optional params (e.g. User update)
-                x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            });
+            //    // ignore omitted parameters on models to enable optional params (e.g. User update)
+            //    x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            //});
+
+            services.AddControllers()
+                .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null)
+                .AddViewLocalization()
+                .AddDataAnnotationsLocalization();
         }
 
         public static void AddEntityService(this IServiceCollection services)

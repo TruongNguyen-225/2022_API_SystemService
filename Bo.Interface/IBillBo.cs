@@ -12,17 +12,17 @@ namespace SystemServiceAPI.Bo.Interface
 {
     public interface IBillBo
     {
-        IQueryable<MonthlyTransactionResponse> GetQueryableViewMonthlyTransaction();
+        IQueryable<MonthlyTransactionResponse> GetQueryableViewMonthlyTransaction(int? month, int? year);
 
         Task<object> GetTransactionByServiceID(int serviceID);
 
-        object GetTransactionByConditions(BillFilterDto req);
+        List<MonthlyTransactionResponse> GetTransactionByConditions(BillFilterDto req);
 
         Task<object> InsertTransactionAsync(BillInsertDto req);
 
         Task<bool> CheckBeforeAddBillElectricity(int serviceID, string code);
 
-        Task<object> UpdateTransactionAsync(BillUpdateDto req);
+        object UpdateTransactionAsync(BillUpdateDto req);
 
         Task<object> DeleteTransactionByBillID(int billID);
 
@@ -34,7 +34,7 @@ namespace SystemServiceAPI.Bo.Interface
 
         Task<byte[]> Print(int billID);
 
-        Task<object> PrintMultiRow(BillPrintTransactionsDto req);
+        byte[] PrintMultiRow(BillPrintTransactionsDto req);
     }
 }
 

@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SystemServiceAPI.Bo;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BillDto;
+using SystemServiceAPI.Entities.Table;
+using SystemServiceAPICore3.Utilities.Constants;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,59 +20,197 @@ namespace SystemServiceAPI.Controllers
     //[Authorize]
     public class BillTempController : ControllerBase
     {
-        private readonly IBillTempBo _billBo;
+        private readonly IBillTempBo billTempBo;
         public BillTempController(IBillTempBo billBo)
         {
-            _billBo = billBo;
+            this.billTempBo = billBo;
         }
 
         [HttpGet]
-        [Route("GetData")]
-        public async Task<object> GetData()
+        [Route("InitData/{month}")]
+        public object InitData(int month)
         {
-            return await _billBo.GetData();
+            try
+            {
+                var queryable = billTempBo.InitData(month);
+
+                return Ok(new
+                {
+                    Result = queryable,
+                    Messages = queryable == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
+        [HttpGet]
+        [Route("GetDataTempByMonth/{month}")]
+        public object GetDataTempByMonth(int month)
+        {
+            try
+            {
+                var queryable = billTempBo.GetDataTempByMonth(month);
+
+                return Ok(new
+                {
+                    Result = queryable?.ToList(),
+                    Messages = queryable == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Thêm mới giao dịch tạm
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("Post")]
-        public async Task<object> Post(BillInsertDto req)
+        [Route("InsertTransaction")]
+        public async Task<object> InsertTransactionAsync(BillInsertDto request)
         {
-            return await _billBo.Post(req);
+            int serviceID = request.ServiceID;
+            string code = request.Code;
+
+            if (serviceID == 1)
+            {
+                bool isExisted = await billTempBo.CheckBeforeAddBillElectricity(serviceID, code);
+
+                if (isExisted)
+                {
+                    return Ok(new
+                    {
+                        Result = default(object),
+                        Messages = String.Format(StatusConstants.IS_EXISTED, "Giao dịch ")
+                    });
+                }
+            }
+
+            var result = await billTempBo.InsertTransactionAsync(request);
+
+            return Ok(new
+            {
+                Result = result,
+                Messages = result == null ? StatusConstants.UPDATE_FAIL : StatusConstants.SUCCESS
+            });
         }
 
+        /// <summary>
+        /// Chỉnh sửa giao dịch
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("Put")]
-        public async Task<object> Put(BillUpdateDto req)
+        [Route("UpdateTransaction")]
+        public object UpdateTransactionAsync(BillUpdateDto req)
         {
-            return await _billBo.Put(req);
+            try
+            {
+                var result = billTempBo.UpdateTransactionAsync(req);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        [HttpDelete]
-        [Route("DeleteByID/{billID}")]
-        public async Task<object> DeleteByID(int billID)
-        {
-            return await _billBo.DeleteByID(billID);
-        }
-
+        /// <summary>
+        /// Xoá giao dịch bới billID
+        /// </summary>
+        /// <param name="billID"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("DeleteMultiRow")]
-        public async Task<object> DeleteMultiRow(BillDeleteDto req)
+        [Route("DeleteTransactionByID/{billID}")]
+        public async Task<object> DeleteTransactionByIDAsync(int billID)
         {
-            return await _billBo.DeleteMultiRow(req);
+            try
+            {
+                var result = await billTempBo.DeleteTransactionByBillID(billID);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
+        /// <summary>
+        /// Xoá nhiều giao dịch
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("PrintMultiRow")]
-        public async Task<object> PrintMultiRow(BillPrintTransactionsDto req)
+        [Route("DeleteTransactions")]
+        public async Task<object> DeleteTransactionsAsync(BillDeleteDto request)
         {
-            return await _billBo.PrintMultiRow(req);
+            try
+            {
+                var result = await billTempBo.DeleteTransactionsAsync(request);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
+        /// <summary>
+        /// In nhiều giao dịch cùng lúc
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("Import/{month}")]
-        public async Task<object> Import(int month)
+        [Route("PrintTransactions")]
+        public async Task<object> PrintTransactionsAsync(BillPrintTransactionsDto request)
         {
-            return await _billBo.Import(month);
+            try
+            {
+                var result = billTempBo.PrintMultiRow(request);
+
+                if (result != null)
+                {
+                    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                }
+
+                return null;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("TestXML")]
+        public async Task<Dictionary<string, int>> TestXML()
+        {
+            List<string> listCode = new List<string>();
+
+            Dictionary<string, int> a = await billTempBo.GetTotalBillElectric(listCode);
+
+            return a;
         }
     }
 }

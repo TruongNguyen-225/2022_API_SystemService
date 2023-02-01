@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
+using System.Xml;
+using DocumentFormat.OpenXml.Drawing;
 using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Context;
@@ -10,314 +15,399 @@ using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPI.Entities.View;
+using SystemServiceAPICore3.Bo;
+using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Dto.Other;
+using SystemServiceAPICore3.Utilities;
+using SystemServiceAPICore3.Utilities.Constants;
 
 namespace SystemServiceAPI.Bo
 {
-    public class BillTempBo: IBillTempBo
+    public class BillTempBo : BaseBo<MonthlyTransaction_TempDto, MonthlyTransactionTemp>, IBillTempBo
     {
-        private readonly AppDbContext _dbContext;
-        public BillTempBo(AppDbContext appDbContext)
+        #region -- Variables --
+
+        private readonly ICustomer customerBo;
+        private readonly IBillBo billBo;
+
+        #endregion
+
+        #region -- Properties --
+        #endregion
+
+        #region -- Constructors --
+
+        public BillTempBo(IServiceProvider serviceProvider, ICustomer customerBo, IBillBo billBo) : base(serviceProvider)
         {
-            _dbContext = appDbContext;
+            this.customerBo = customerBo;
+            this.billBo = billBo;
         }
 
-        public async Task<object> GetData()
+        #endregion
+
+        #region -- Overrides --
+        #endregion
+
+        public IQueryable<MonthlyTransactionTemp> GetDataTempByMonth(int month)
         {
-            ResponseResults response = new ResponseResults();
+            int currentMonth = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
+
+            var monthlyTransactionTemp = GetQueryable<MonthlyTransactionTemp>();
+            var transactionQueryable = from transaction in monthlyTransactionTemp
+                                       where transaction.DateTimeAdd.Month == month && transaction.DateTimeAdd.Year == (month == 12 ? year - 1 : year)
+                                       orderby transaction.RetailID descending
+                                       select transaction;
+
+            return transactionQueryable;
+        }
+
+        public async Task<Dictionary<string, int>> GetTotalBillElectric(List<string> listCode)
+        {
+            int money = 0;
+            string code = String.Empty;
+
+            XmlDocument xmltest = new XmlDocument();
+            foreach (var item in listCode)
+            {
+                code = item;
+                string URL = $"https://www.cskh.evnspc.vn/ThanhToanTienDien/XuLyThanhToanTrucTuyenTienDien?MaKhachHang={code}";
+                string html = await GetWebContent(URL);
+                //xmltest.LoadXml(html);
+
+                //XmlNodeList elemlist = xmltest.GetElementsByTagName("p");
+                //string result = elemlist[0].InnerXml;
+            }
+
+            //string html = @"<div>
+            //                <div>
+            //                        <p>
+            //                            Id hóa đơn: 1194407175
+            //                            Loại hóa đơn: Tiền điện
+            //                            Tiền nợ: 163.664 đồng
+            //                            Thuế nợ: 16.366 đồng
+            //                            Tổng tiền: 180.030 đồng
+            //                        </p>
+            //                </div>
+            //                <div>
+            //                    <p ><span>Chọn nhà cung cấp</span></p>
+            //                    <ul>
+            //                        <li><a></a></li>
+            //                    </ul>
+            //                </div>
+            //            </div>";
+
+            //string html = "<item><name>wrench</name></item>";
+            //xmltest.LoadXml(html);
+
+            //XmlNodeList elemlist = xmltest.GetElementsByTagName("p");
+            //string result = elemlist[0].InnerXml;
+
+            return new Dictionary<string, int>();
+        }
+
+        // Tải về trang web và trả về chuỗi nội dung
+        public static async Task<string> GetWebContent(string url)
+        {
+            // Khởi tạo http client
+            using var httpClient = new HttpClient();
+
+            // Thiết lập các Header nếu cần
+            httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml+json");
             try
             {
-                int serviceID = 1;
-                List<vw_MonthlyTransactionTemp> data = await _dbContext.vw_MonthlyTransactionTemp.Where(
-                   x => x.ServiceID == serviceID &&
-                   x.Month == DateTime.Now.Month &&
-                   x.Year == DateTime.Now.Year
-               ).ToListAsync();
+                // Thực hiện truy vấn GET
+                HttpResponseMessage response = await httpClient.GetAsync(url);
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
+                // Phát sinh Exception nếu mã trạng thái trả về là lỗi
+                response.EnsureSuccessStatusCode();
+
+                // Đọc nội dung content trả về - ĐỌC CHUỖI NỘI DUNG
+                string htmltext = await response.Content.ReadAsStringAsync();
+                return htmltext;
             }
             catch (Exception ex)
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                Console.WriteLine(ex.Message);
+                return null;
             }
-
-            return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> Post(BillInsertDto req)
+        /// <summary>
+        /// Init data from previous month
+        /// </summary>
+        /// <param name="month"></param>
+        /// <returns></returns>
+        public async Task<object> InitData(int month)
         {
-            ResponseResults response = new ResponseResults();
             try
             {
-                //check xem đơn đã tồn tại chưa, đối với hóa đơn tiền điện
-                if(req.ServiceID == 1)
+                var unitOfWork = GetDataContext();
+                await unitOfWork.BeginTransactionAsync();
+
+                int currentMonth = DateTime.Now.Month;
+                int year = DateTime.Now.Year;
+                var monthlyTransactionTemp = GetQueryable<MonthlyTransactionTemp>();
+                var monthlyTransactionTempRepo = GetRepository<MonthlyTransactionTemp>();
+
+                var transactionQueryable = GetDataTempByMonth(currentMonth);
+
+                if (transactionQueryable.Any())
                 {
-                    var checkExist = _dbContext.MonthlyTransactionTemp.Where(
-                            x => x.Code == req.Code && 
-                            x.ServiceID == 1 && 
-                            x.DateTimeAdd.Month == DateTime.Now.Month && 
-                            x.DateTimeAdd.Year == DateTime.Now.Year
-                        ).FirstOrDefault();
+                    var transactionsCurrentTemp = transactionQueryable.ToArray();
+                    monthlyTransactionTempRepo.Delete(transactionsCurrentTemp);
 
-                    if(checkExist != null)
-                    {
-                        response.Code = (int)HttpStatusCode.InternalServerError;
-                        response.Result = null;
-                        response.Msg = "Mã số tiền điện " +req.Code + " da ton tai";
+                    await unitOfWork.CommitAsync();
+                    monthlyTransactionTempRepo.Save();
 
-                        return await Task.FromResult(response);
-                    }
-                }
-
-                    MonthlyTransactionTemp m = new MonthlyTransactionTemp();
-                    m.CustomerID = req.CustomerID;
-                    m.ServiceID = req.ServiceID;
-                    m.RetailID = req.RetailID;
-                    m.BankID = req.BankID;
-                    m.Code = req.Code;
-                    m.Money = req.Money;
-                    m.Postage = req.Postage;
-                    m.Total = req.Total;
-                    m.Status = req.Status;
-                    m.DateTimeAdd = DateTime.Now;
-                    m.DateTimeUpdate = null;
-
-                    _dbContext.Add(m);
-                    _dbContext.SaveChanges();
-
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = m;
-                    response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
-            }
-
-            return await Task.FromResult(response);
-        }
-
-        public async Task<ResponseResults> Put(BillUpdateDto req)
-        {
-            ResponseResults response = new ResponseResults();
-            try
-            {
-                var billData = _dbContext.MonthlyTransactionTemp.Where(
-                        x => x.ID == req.ID &&
-                        x.DateTimeAdd.Month == DateTime.Now.Month &&
-                        x.DateTimeAdd.Year == DateTime.Now.Year
-                    ).FirstOrDefault();
-
-                if(billData != null)
-                {
-                    billData.Money = req.Money;
-                    billData.Postage = req.Postage;
-                    billData.Total = req.Total;
-                    billData.DateTimeUpdate = DateTime.Now;
-
-                    _dbContext.Update(billData);
-                    _dbContext.SaveChanges();
-
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = billData;
-                    response.Msg = "SUCCESS";
-
-                    return await Task.FromResult(response);
-                }
-
-                response.Code = (int)HttpStatusCode.NotFound;
-                response.Result = null;
-                response.Msg = "NOT FOUND";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.NotModified;
-                response.Result = null;
-                response.Msg = ex.Message;
-            }
-
-            return await Task.FromResult(response);
-        }
-
-        public async Task<ResponseResults> DeleteByID(int billID)
-        {
-            ResponseResults response = new ResponseResults();
-
-            try
-            {
-                var data = _dbContext.MonthlyTransactionTemp.Where(x => x.ID == billID).FirstOrDefault();
-                if(data == null)
-                {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
+                    return Task.FromResult(default(object));
                 }
                 else
                 {
-                    _dbContext.Remove(data);
-                    _dbContext.SaveChanges();
-
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = null;
-                    response.Msg = "SUCCESS";
-                }
-            }
-            catch(Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
-            }
-
-            return await Task.FromResult(response);
-        }
-
-        public async Task<ResponseResults> DeleteMultiRow(BillDeleteDto req)
-        {
-            ResponseResults response = new ResponseResults();
-            List<string> listID = req.ListBillID.Split(';').ToList();
-            try
-            {
-                var billData = _dbContext.MonthlyTransactionTemp.Where(
-                        x => x.ServiceID == req.ServiceID &&
-                        listID.Contains(x.ID.ToString()) &&
-                        x.DateTimeAdd.Month == req.Month &&
-                        x.DateTimeAdd.Year == req.Year
-                    );
-
-                if (billData == null)
-                {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
-                }
-                else
-                {
-                    foreach(MonthlyTransactionTemp item in billData)
+                    BillFilterDto request = new BillFilterDto
                     {
-                        _dbContext.Remove(item);
+                        ServiceID = 1,
+                        RetailID = null,
+                        Month = month,
+                        Year = month == 12 ? year - 1 : year
+                    };
+
+                    var transactions = billBo.GetTransactionByConditions(request);
+
+                    //insert data
+                    if (transactions.Count() > 0)
+                    {
+                        List<string> listCode = new List<string>();
+
+                        foreach(var item in transactions)
+                        {
+                            listCode.Add(item.Code);
+                            //monthlyTransactionTempRepo.Insert(item);
+                        }
+
+                        Dictionary<string, int> result = await GetTotalBillElectric(listCode);
+
+                        foreach (var item in transactions)
+                        {
+                            if (result.ContainsKey(item.Code))
+                            {
+                                item.Total = result.GetValueOrDefault(item.Code) + item.Postage;
+                                item.Money = result.GetValueOrDefault(item.Code);
+                            }
+                        }
                     }
 
-                    _dbContext.SaveChanges(true);
+                    await unitOfWork.CommitAsync();
+                    monthlyTransactionTempRepo.Save();
 
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = null;
-                    response.Msg = "SUCCESS";
+                    return Task.FromResult(transactions);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                await unitOfWork.RollbackAsync();
+                throw;
             }
-
-            return await Task.FromResult(response);
         }
 
-        public async Task<ResponseResults> Import(int month)
+        /// <summary>
+        /// Thêm mới giao dịch
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        public async Task<object> InsertTransactionAsync(BillInsertDto req)
         {
-            ResponseResults response = new ResponseResults();
+            var monthlyTransactionRepository = GetRepository<MonthlyTransactionTemp>();
+            var target = mapper.Map<BillInsertDto, MonthlyTransactionTemp>(req);
+            target.DateTimeAdd = DateTime.Now;
 
-            var checkData = _dbContext.MonthlyTransactionTemp.ToList();
-            if(checkData.Count > 0)
-            {
-                foreach(var item in checkData)
-                {
-                    _dbContext.MonthlyTransactionTemp.Remove(item);
-                }
-                _dbContext.SaveChanges();
-            }
+            await monthlyTransactionRepository.InsertAsync(target);
+            await monthlyTransactionRepository.SaveAsync();
 
-            var data = _dbContext.vw_MonthlyTransactions
-                .Where(x => x.ServiceID == 1 && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == DateTime.Now.Year)
-                .ToList();
+            var result = mapper.Map<MonthlyTransactionDto>(target);
 
-            if(data.Count > 0)
-            {
-                try
-                {
-                    foreach(var req in data)
-                    {
-                        MonthlyTransactionTemp m = new MonthlyTransactionTemp();
-                        m.CustomerID = req.CustomerID;
-                        m.ServiceID = req.ServiceID;
-                        m.RetailID = req.RetailID;
-                        m.BankID = req.BankID;
-                        m.Code = req.Code;
-                        m.Money = 0;
-                        m.Postage = 0;
-                        m.Total = 0;
-                        m.Status = 1;
-                        m.DateTimeAdd = DateTime.Now;
-                        m.DateTimeUpdate = null;
-
-                        _dbContext.MonthlyTransactionTemp.Add(m);
-                    }
-                    
-                    _dbContext.SaveChanges();
-
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = data;
-                    response.Msg = "SUCCESS";
-                }
-                catch(Exception ex)
-                {
-                    response.Code = (int)HttpStatusCode.InternalServerError;
-                    response.Result = null;
-                    response.Msg = ex.Message;
-                }
-            }
-            else
-            {
-                response.Code = (int)HttpStatusCode.NotFound;
-                response.Result = null;
-                response.Msg = "NOT FOUND";
-            }
-
-            return await Task.FromResult(response);
+            return await Task.FromResult(result);
         }
 
-        public async Task<ResponseResults> PrintMultiRow(BillPrintTransactionsDto req)
+        /// <summary>
+        /// Kiểm tra trước khi thêm giao dịch
+        /// Với dịch vụ tiền điện, 1 tháng chỉ đóng 1 lần, nên không thể trùng code.
+        /// </summary>
+        /// <param name="serviceID"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public async Task<bool> CheckBeforeAddBillElectricity(int serviceID, string code)
         {
-            ResponseResults response = new ResponseResults();
+            int month = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
 
-            List<string> listID = req.ListBillID.Split(';').ToList();
+            var monthlyTransactionRepository = GetRepository<MonthlyTransaction>();
+
+            var checkExisted = monthlyTransactionRepository.FindBy(x => x.Code == code
+                && x.ServiceID == serviceID
+                && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year
+                );
+
+            if (checkExisted.Any())
+            {
+                return await Task.FromResult(true);
+            }
+
+            return await Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// Cập nhật giao dịch
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        public object UpdateTransactionAsync(BillUpdateDto req)
+        {
+            int month = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
+            var monthlyTransactionRepository = GetRepository<MonthlyTransactionTemp>();
+            var monthlyTransactionQueryable = GetQueryable<MonthlyTransactionTemp>();
+
+            var transaction = monthlyTransactionQueryable
+                .Where(x => x.ID == req.ID && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year)
+                .FirstOrDefault();
+
+            if (transaction != null)
+            {
+                transaction = mapper.Map<BillUpdateDto, MonthlyTransactionTemp>(req, transaction);
+                transaction.DateTimeUpdate = DateTime.Now;
+                monthlyTransactionRepository.Update(transaction, true);
+
+                return transaction;
+            }
+
+            return default(object);
+        }
+
+        /// <summary>
+        /// Xoá một giao dịch bằng ID
+        /// </summary>
+        /// <param name="billID"></param>
+        /// <returns></returns>
+        public async Task<object> DeleteTransactionByBillID(int billID)
+        {
+            var monthlyTransactionRepository = GetRepository<MonthlyTransactionTemp>();
+            var transaction = monthlyTransactionRepository.FindBy(x => x.ID == billID).FirstOrDefault();
+
+            if (transaction != null)
+            {
+                monthlyTransactionRepository.Delete(transaction, true);
+
+                return await Task.FromResult(transaction);
+            }
+
+            return await Task.FromResult(default(object));
+        }
+
+        /// <summary>
+        /// Xoá nhiều giao dịch
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        public async Task<object> DeleteTransactionsAsync(BillDeleteDto req)
+        {
             try
             {
-                var billData = await _dbContext.MonthlyTransactionTemp.Where(
-                        x => x.ServiceID == req.ServiceID &&
-                        listID.Contains(x.ID.ToString()) &&
-                        x.DateTimeAdd.Month == req.Month &&
-                        x.DateTimeAdd.Year == req.Year
-                    ).ToListAsync();
+                var unitOfWork = GetDataContext();
+                unitOfWork.BeginTransaction();
 
-                if (billData.Count < 1)
+                List<string> listID = req.ListBillID.Split(';').ToList();
+                int serviceID = req.ServiceID;
+                int month = req.Month;
+                int year = req.Year;
+
+                var monthlyTransactionRepository = GetRepository<MonthlyTransactionTemp>();
+                var queryable = monthlyTransactionRepository
+                    .FindBy(x => x.ServiceID == serviceID
+                                && listID.Contains(x.CustomerID.ToString())
+                                && x.DateTimeAdd.Month == month
+                                && x.DateTimeAdd.Year == year);
+
+                if (queryable.Any())
                 {
-                    response.Code = (int)HttpStatusCode.NotFound;
-                    response.Result = null;
-                    response.Msg = "NOT FOUND";
+                    var transactions = queryable.ToList();
+                    foreach (var transaction in transactions)
+                    {
+                        monthlyTransactionRepository.Delete(transaction, false);
+                    }
+
+                    unitOfWork.Save();
+                    unitOfWork.Commit();
+
+                    return await Task.FromResult(transactions);
                 }
-                else
-                {
-                    response.Code = (int)HttpStatusCode.OK;
-                    response.Result = billData;
-                    response.Msg = "SUCCESS";
-                }
+                unitOfWork.Commit();
+                return await Task.FromResult(default(object));
             }
-            catch (Exception ex)
+            catch
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = ex.Message;
+                unitOfWork.Rollback();
+                throw;
             }
+        }
 
-            return await Task.FromResult(response);
+        public byte[] PrintMultiRow(BillPrintTransactionsDto req)
+        {
+            var tblCustomer = GetQueryable<Customer>();
+            var tblBillTemp = GetQueryable<MonthlyTransactionTemp>();
+            var tblRetail = GetQueryable<Retail>();
+
+            List<string> listID = req.ListBillID.Split(";").ToList();
+
+            var listBillTemp = (from temp in tblBillTemp
+                                from customer in tblCustomer.Where(x => x.CustomerID == temp.CustomerID).DefaultIfEmpty()
+                                from retail in tblRetail.Where(x => x.RetailID == temp.RetailID).DefaultIfEmpty()
+                                where
+                                    temp.DateTimeAdd.Month == req.Month
+                                    && temp.DateTimeAdd.Year == req.Year
+                                    && temp.ServiceID == req.ServiceID
+                                    && listID.Contains(temp.ID.ToString())
+                                orderby temp.RetailID
+                                select new
+                                {
+                                    FullName = customer.FullName,
+                                    Code = customer.Code,
+                                    Money = temp.Money,
+                                    Postage = temp.Postage,
+                                    Total = temp.Total,
+                                    RetailName = retail.RetailName,
+                                }).ToList();
+
+            DataTable dataTable = Utility.ToDataTable(listBillTemp);
+
+            DateTime? fromDate = new DateTime(req.Year, req.Month, 1);
+            DateTime? toDate = new DateTime(req.Year, req.Month, 20);
+
+            FileNameParams fileNameParams = new FileNameParams
+            {
+                FileName = ExportExcelConstants.FILE_NAME_LIST_ELECTRIC_BILL,
+                FromDate = fromDate.ConvertDateTimeToString103(),
+                ToDate = toDate.ConvertDateTimeToString103(),
+                TimeExport = toDate.Value,
+            };
+
+            CellParams cellParams = new CellParams
+            {
+                MaxColumn = 20,
+                StartColumn = 3,
+                StartRow = 7,
+            };
+
+            ExcelParamDefault excelParamDefault = new ExcelParamDefault
+            {
+                fileNameParam = null,
+                cellParam = cellParams
+            };
+
+            string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+            byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
+
+            return excel;
         }
     }
 }

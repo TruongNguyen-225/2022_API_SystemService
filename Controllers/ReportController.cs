@@ -46,6 +46,20 @@ namespace SystemServiceAPI.Controllers
             }
 
             return null;
-        } 
+        }
+
+        [HttpGet]
+        [Route("TestExport")]
+        public FileResult TestExport()
+        {
+            byte[] res = _reportBo.TestExport();
+
+            if (res != null)
+            {
+                return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+            }
+
+            return null;
+        }
     }
 }

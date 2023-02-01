@@ -7,7 +7,11 @@ namespace SystemServiceAPI.Bo.Interface
     public interface IReport
     {
         Task<ResponseResults> GetByCondition(ReportRequestDto req);
+
         Task<ResponseResults> HistoryReport();
+
         byte[] Export (ExportDto req);
+
+        byte[] TestExport();
     }
 }

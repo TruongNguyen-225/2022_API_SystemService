@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
@@ -20,6 +21,9 @@ namespace SystemServiceAPI.Bo
     public class CustomerBo : BaseBo<CustomerDto, Customer>, ICustomer
     {
         #region -- Variables --
+
+        private readonly IServiceProvider serviceProvider;
+
         #endregion
 
         #region -- Properties --
@@ -34,6 +38,7 @@ namespace SystemServiceAPI.Bo
         public CustomerBo(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
+            this.serviceProvider = serviceProvider;
         }
 
         #endregion
@@ -60,7 +65,7 @@ namespace SystemServiceAPI.Bo
                           from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
                           from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
                           where customer.IsDelete == false
-                          orderby customer.FullName ascending, customer.DateTimeAdd descending
+                          //orderby customer.FullName ascending, customer.DateTimeAdd descending
                           select new CustomerResponse
                           {
                               STT = 1,
@@ -83,6 +88,30 @@ namespace SystemServiceAPI.Bo
 
             return queryable;
         }
+
+        /// <summary>
+        /// Lấy thông tin tiền điện của khách hàng theo ID
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<object> GetBillElectricByCustomerID(int customerID)
+        {
+            var tempBo = serviceProvider.GetService<IBillTempBo>();
+            int serviceID = 1;
+            int month = DateTime.Now.Month;
+
+            var queryable = tempBo.GetDataTempByMonth(month);
+            var dataTemp = queryable.Where(x => x.ServiceID == serviceID && x.CustomerID == customerID).FirstOrDefault();
+
+            if(dataTemp != null)
+            {
+                return await Task.FromResult(dataTemp);
+            }
+
+            var customer = GetCustomerByID(customerID);
+            return await Task.FromResult(customer);
+        }
+
 
         /// <summary>
         /// Lấy thông tin khách hàng khi biết customerID
