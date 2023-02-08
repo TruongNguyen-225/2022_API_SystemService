@@ -77,7 +77,20 @@ namespace SystemServiceAPI.Controllers
         [Route("GetCustomerByServiceID/{serviceID}")]
         public async Task<object> GetCustomerByServiceID(int serviceID)
         {
-            return await customerBo.GetCustomerByServiceID(serviceID);
+            try
+            {
+                var result = await customerBo.GetCustomerByServiceID(serviceID);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>

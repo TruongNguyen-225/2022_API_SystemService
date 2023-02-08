@@ -26,6 +26,12 @@ namespace SystemServiceAPI.Controllers
             this.billTempBo = billBo;
         }
 
+        /// <summary>
+        /// Tạo dữ liệu tạm cho tháng hiện tại từ tháng trước
+        /// Đưa vào tháng trước đó
+        /// </summary>
+        /// <param name="month"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("InitData/{month}")]
         public object InitData(int month)
@@ -46,6 +52,11 @@ namespace SystemServiceAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Load data temp binding table
+        /// </summary>
+        /// <param name="month"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetDataTempByMonth/{month}")]
         public object GetDataTempByMonth(int month)
@@ -201,6 +212,28 @@ namespace SystemServiceAPI.Controllers
                 throw;
             }
         }
+
+        [HttpPost]
+        [Route("PrintBillElectricInit")]
+        public async Task<object> PrintBillElectricInit()
+        {
+            try
+            {
+                var result = billTempBo.PrintBillElectricInit();
+
+                if (result != null)
+                {
+                    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                }
+
+                return null;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
 
         [HttpGet]
         [Route("TestXML")]

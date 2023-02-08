@@ -194,6 +194,11 @@ namespace SystemServiceAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// In một hóa đơn
+        /// </summary>
+        /// <param name="billID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("PrintTransaction/{billID}")]
         public async Task<FileResult> PrintTransactionAsync(int billID)
@@ -203,6 +208,7 @@ namespace SystemServiceAPI.Controllers
                 var result = await billBo.Print(billID);
                 if (result != null)
                 {
+                    //TODO
                     return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
                 }
 
@@ -216,6 +222,7 @@ namespace SystemServiceAPI.Controllers
 
         /// <summary>
         /// In nhiều giao dịch cùng lúc
+        /// Chưa cần thiết, chức năng này sẽ dùng trong billTempController -> in đầu tháng
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -225,22 +232,26 @@ namespace SystemServiceAPI.Controllers
         {
             try
             {
-                BillPrintTransactionsDto request = new BillPrintTransactionsDto
+                //BillPrintTransactionsDto request = new BillPrintTransactionsDto
+                //{
+                //    ServiceID = 1,
+                //    ListBillID = "4476;4477;4478;4480;4483;4484;4485;4486;4487;4488;4489;4490;4491;4492;4493;4494;4495;4496;4497;4498;4499;4500;4501;4502;4503;4504;4505;4506;4507;4508;4509;4510;4511;4512;4513;4514;4515;4516;4517;4518;4519;4520;4521;4522;4523;4524;4525;4526;4527;4528;4529;4530;4531;4532;4533;4534;4535;4536;4537",
+                //    Month = 1,
+                //    Year = 2023
+                //};
+
+                //var result = billBo.PrintMultiRow(request);
+
+                //if (result != null)
+                //{
+                //    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                //}
+
+                return Ok(new
                 {
-                    ServiceID = 1,
-                    ListBillID = "4476;4477;4478;4480;4483;4484;4485;4486;4487;4488;4489;4490;4491;4492;4493;4494;4495;4496;4497;4498;4499;4500;4501;4502;4503;4504;4505;4506;4507;4508;4509;4510;4511;4512;4513;4514;4515;4516;4517;4518;4519;4520;4521;4522;4523;4524;4525;4526;4527;4528;4529;4530;4531;4532;4533;4534;4535;4536;4537",
-                    Month = 1,
-                    Year = 2023
-                };
-
-                var result = billBo.PrintMultiRow(request);
-
-                if (result != null)
-                {
-                    return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
-                }
-
-                return null;
+                    Result = default(object),
+                    Messages = StatusConstants.NOT_FOUND
+                });
             }
             catch
             {

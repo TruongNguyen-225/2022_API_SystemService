@@ -43,7 +43,7 @@ namespace SystemServiceAPICore3.Infrastructure.Extensions
             //});
 
             services.AddControllers()
-                .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null)
+                //.AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null)
                 .AddViewLocalization()
                 .AddDataAnnotationsLocalization();
         }

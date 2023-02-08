@@ -87,9 +87,9 @@ namespace SystemServiceAPI.Bo
         /// <returns></returns>
         public async Task<object> GetTransactionByServiceID(int serviceID)
         {
-            var viewMonthyTransactionQueryable =  GetQueryableViewMonthlyTransaction(null, null);
+            var viewMonthyTransactionQueryable = GetQueryableViewMonthlyTransaction(null, null);
             var queryable = viewMonthyTransactionQueryable
-                .Where(x => x.ServiceID == serviceID )
+                .Where(x => x.ServiceID == serviceID)
                 .OrderByDescending(x => x.DateTimeAdd);
 
             if (queryable.Any())
@@ -114,7 +114,7 @@ namespace SystemServiceAPI.Bo
 
             var viewMonthyTransactionQueryable = GetQueryableViewMonthlyTransaction(month, year);
             var queryable = viewMonthyTransactionQueryable
-                .Where(x => x.ServiceID == serviceID && (retailID.HasValue ?  x.RetailID == retailID : true) && (month.HasValue ? x.Month == month : true) && (year.HasValue ? x.Year == year : true))
+                .Where(x => x.ServiceID == serviceID && (retailID.HasValue ? x.RetailID == retailID : true) && (month.HasValue ? x.Month == month : true) && (year.HasValue ? x.Year == year : true))
                 .OrderByDescending(x => x.DateTimeAdd);
 
             if (queryable.Any())
@@ -134,7 +134,7 @@ namespace SystemServiceAPI.Bo
         public async Task<object> InsertTransactionAsync(BillInsertDto req)
         {
             var monthlyTransactionRepository = GetRepository<MonthlyTransaction>();
-            var target = mapper.Map<BillInsertDto, MonthlyTransaction> (req);
+            var target = mapper.Map<BillInsertDto, MonthlyTransaction>(req);
             target.DateTimeAdd = DateTime.Now;
 
             await monthlyTransactionRepository.InsertAsync(target);
@@ -157,7 +157,7 @@ namespace SystemServiceAPI.Bo
             int year = DateTime.Now.Year;
 
             var monthlyTransactionRepository = GetRepository<MonthlyTransaction>();
-           
+
             var checkExisted = monthlyTransactionRepository.FindBy(x => x.Code == code
                 && x.ServiceID == serviceID
                 && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year
@@ -187,7 +187,7 @@ namespace SystemServiceAPI.Bo
                 .Where(x => x.ID == req.ID && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year)
                 .FirstOrDefault();
 
-            if(transaction != null)
+            if (transaction != null)
             {
                 transaction = mapper.Map<BillUpdateDto, MonthlyTransaction>(req, transaction);
                 transaction.DateTimeUpdate = DateTime.Now;
@@ -209,7 +209,7 @@ namespace SystemServiceAPI.Bo
             var monthlyTransactionRepository = GetRepository<MonthlyTransaction>();
             var transaction = monthlyTransactionRepository.FindBy(x => x.ID == billID).FirstOrDefault();
 
-            if(transaction != null)
+            if (transaction != null)
             {
                 monthlyTransactionRepository.Delete(transaction, true);
 
@@ -286,7 +286,7 @@ namespace SystemServiceAPI.Bo
                 var viewMonthlyTransactionQueryable = GetQueryableViewMonthlyTransaction(month, year);
                 var dataBill = viewMonthlyTransactionQueryable.Where(x => x.ID == billID && x.Month == month && x.Year == year);
 
-                if(dataBill.Any())
+                if (dataBill.Any())
                 {
                     DataTable table = Utility.ToDataTable(dataBill.ToList());
                     byte[] byteArray = ExcelUtility.CreateAndWriteBillExcel(table);
@@ -294,7 +294,7 @@ namespace SystemServiceAPI.Bo
                     return byteArray;
                 }
 
-                return new byte[] {};
+                return new byte[] { };
             }
             catch
             {

@@ -72,8 +72,7 @@ namespace SystemServiceAPI.Bo
 
             foreach (var item in listCode)
             {
-                code = item;
-                string URL = $"https://www.cskh.evnspc.vn/ThanhToanTienDien/XuLyThanhToanTrucTuyenTienDien?MaKhachHang={code}";
+                string URL = $"https://www.cskh.evnspc.vn/ThanhToanTienDien/XuLyThanhToanTrucTuyenTienDien?MaKhachHang={item}";
                 string html = await GetWebContent(URL);
 
                 HtmlDocument doc = new HtmlDocument();
@@ -122,6 +121,26 @@ namespace SystemServiceAPI.Bo
             }
         }
 
+        public static int GetMoneyFromHTML(string html)
+        {
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var element = doc.DocumentNode.SelectNodes("//div[@class='customer-info']");
+            var temp = String.Empty;
+            int result = 0;
+
+            if (element != null)
+            {
+                var text = element.FirstOrDefault().InnerText.Trim().Replace("\n", "").Replace("\r", "");
+                var search = "Tổng tiền:";
+                temp = text.Substring(text.IndexOf(search) + search.Length);
+                result = DataAccess.CorrectValue((temp.Replace(".", "").Split(' ')[0]), 0);
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Init data from previous month
         /// </summary>
@@ -145,52 +164,48 @@ namespace SystemServiceAPI.Bo
                 {
                     var transactionsCurrentTemp = transactionQueryable.ToArray();
                     monthlyTransactionTempRepo.Delete(transactionsCurrentTemp);
-
-                    await unitOfWork.CommitAsync();
                     monthlyTransactionTempRepo.Save();
-
-                    return Task.FromResult(default(object));
                 }
-                else
+
+                BillFilterDto request = new BillFilterDto
                 {
-                    BillFilterDto request = new BillFilterDto
+                    ServiceID = 1,
+                    RetailID = null,
+                    Month = month,
+                    Year = month == 12 ? year - 1 : year
+                };
+
+                var transactions = billBo.GetTransactionByConditions(request);
+
+                //insert data
+                if (transactions.Count() > 0)
+                {
+                    List<string> listCode = new List<string>();
+
+                    foreach (var item in transactions)
                     {
-                        ServiceID = 1,
-                        RetailID = null,
-                        Month = month,
-                        Year = month == 12 ? year - 1 : year
-                    };
-
-                    var transactions = billBo.GetTransactionByConditions(request);
-
-                    //insert data
-                    if (transactions.Count() > 0)
-                    {
-                        List<string> listCode = new List<string>();
-
-                        foreach(var item in transactions)
-                        {
-                            listCode.Add(item.Code);
-                            //monthlyTransactionTempRepo.Insert(item);
-                        }
-
-                        Dictionary<string, int> result = await GetTotalBillElectric(listCode);
-
-                        foreach (var item in transactions)
-                        {
-                            if (result.ContainsKey(item.Code))
-                            {
-                                item.Total = result.GetValueOrDefault(item.Code) + item.Postage;
-                                item.Money = result.GetValueOrDefault(item.Code);
-                            }
-                        }
+                        listCode.Add(item.Code);
                     }
 
-                    await unitOfWork.CommitAsync();
-                    monthlyTransactionTempRepo.Save();
+                    Dictionary<string, int> result = await GetTotalBillElectric(listCode);
 
-                    return Task.FromResult(transactions);
+                    foreach (var item in transactions)
+                    {
+                        if (result.ContainsKey(item.Code))
+                        {
+                            item.Total = result.GetValueOrDefault(item.Code) + item.Postage;
+                            item.Money = result.GetValueOrDefault(item.Code);
+                            MonthlyTransactionTemp entity = mapper.Map<MonthlyTransactionTemp>(item);
+
+                            monthlyTransactionTempRepo.Insert(entity);
+                        }
+                    }
                 }
+
+                await unitOfWork.CommitAsync();
+                monthlyTransactionTempRepo.Save();
+
+                return Task.FromResult(transactions);
             }
             catch
             {
@@ -398,5 +413,67 @@ namespace SystemServiceAPI.Bo
 
             return excel;
         }
+
+        public byte[] PrintBillElectricInit()
+        {
+            var tblCustomer = GetQueryable<Customer>();
+            var tblBillTemp = GetQueryable<MonthlyTransactionTemp>();
+            var tblRetail = GetQueryable<Retail>();
+
+            int month = DateTime.Now.Month;
+            int year = DateTime.Now.Year;
+            int serviceID = 1;
+
+            var listBillTemp = (from temp in tblBillTemp
+                                from customer in tblCustomer.Where(x => x.CustomerID == temp.CustomerID).DefaultIfEmpty()
+                                from retail in tblRetail.Where(x => x.RetailID == temp.RetailID).DefaultIfEmpty()
+                                where
+                                    temp.DateTimeAdd.Month == month
+                                    && temp.DateTimeAdd.Year == year
+                                    && temp.ServiceID == serviceID
+                                orderby temp.RetailID
+                                select new
+                                {
+                                    FullName = customer.FullName,
+                                    Code = customer.Code,
+                                    Money = temp.Money,
+                                    Postage = temp.Postage,
+                                    Total = temp.Total,
+                                    RetailName = retail.RetailName,
+                                }).ToList();
+
+            DataTable dataTable = Utility.ToDataTable(listBillTemp);
+
+            DateTime? fromDate = new DateTime(year, month, 1);
+            DateTime? toDate = new DateTime(year, month, 20);
+
+            FileNameParams fileNameParams = new FileNameParams
+            {
+                FileName = ExportExcelConstants.FILE_NAME_LIST_ELECTRIC_BILL,
+                FromDate = fromDate.ConvertDateTimeToString103(),
+                ToDate = toDate.ConvertDateTimeToString103(),
+                TimeExport = toDate.Value,
+            };
+
+            CellParams cellParams = new CellParams
+            {
+                MaxColumn = 20,
+                StartColumn = 3,
+                StartRow = 7,
+            };
+
+            ExcelParamDefault excelParamDefault = new ExcelParamDefault
+            {
+                fileNameParam = null,
+                cellParam = cellParams
+            };
+
+            //string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+            string pathTemplate = @"https://latex.itdvgroup.com/Report/Template/initBillTemplate.xlsx";
+            byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
+
+            return excel;
+        }
+
     }
 }

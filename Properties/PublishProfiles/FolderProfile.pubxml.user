@@ -4,7 +4,13 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_PublishTargetUrl>C:\inetpub\wwwroot\SystemServiceAPI</_PublishTargetUrl>
-    <History>True|2022-08-09T10:17:05.1160842Z;True|2022-08-09T17:09:30.6101202+07:00;True|2022-08-09T17:07:49.2032231+07:00;True|2022-07-20T22:50:30.8052504+07:00;True|2022-07-18T07:57:13.0057132+07:00;True|2022-07-18T07:56:39.6233712+07:00;True|2022-07-18T07:39:21.4188738+07:00;True|2022-07-14T23:00:55.5244565+07:00;True|2022-07-14T21:59:52.0195923+07:00;False|2022-07-14T21:57:05.9287963+07:00;False|2022-07-14T21:53:01.3650080+07:00;</History>
+    <_PublishTargetUrl>C:\inetpub\wwwroot\SystemServiceAPI_V1_1</_PublishTargetUrl>
+    <History>True|2023-02-08T09:57:31.6154421Z;True|2023-02-01T11:07:42.2485897+07:00;True|2023-02-01T10:35:31.6440085+07:00;True|2023-02-01T10:10:14.1656082+07:00;True|2023-02-01T10:09:46.6407061+07:00;True|2023-02-01T10:01:10.9415851+07:00;True|2023-02-01T10:00:33.2745996+07:00;True|2023-02-01T09:25:48.4555817+07:00;True|2023-02-01T09:23:01.9620745+07:00;True|2022-08-09T17:17:05.1160842+07:00;True|2022-08-09T17:09:30.6101202+07:00;True|2022-08-09T17:07:49.2032231+07:00;True|2022-07-20T22:50:30.8052504+07:00;True|2022-07-18T07:57:13.0057132+07:00;True|2022-07-18T07:56:39.6233712+07:00;True|2022-07-18T07:39:21.4188738+07:00;True|2022-07-14T23:00:55.5244565+07:00;True|2022-07-14T21:59:52.0195923+07:00;False|2022-07-14T21:57:05.9287963+07:00;False|2022-07-14T21:53:01.3650080+07:00;</History>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
   </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=103.28.36.36\MSSQLSERVER2012, 1433%3bDatabase=nhngu10y_ServiceSystem%3bUser ID=nhngu10y_admin%3bPassword=admin%402021!%3bConnect Timeout=20%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
 </Project>
