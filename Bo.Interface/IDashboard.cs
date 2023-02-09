@@ -4,9 +4,10 @@ namespace SystemServiceAPI.Bo.Interface
 {
     public interface IDashboard
     {
-        Task<object> GetValueDashboard(int month);
-        Task<object> GetBarChart(int take);
-        Task<object> GetPieChart(int month);
-        Task<object> GetPieChartService(int month);
+        Task<object> GetValueDashboard(int? month, int? year);
+        Task<object> GetBarChart(int take, int? month, int? year);
+        Task<object> GetPieChart(int? month, int? year);
+
+        //Task<object> GetPieChartService(int month);
     }
 }

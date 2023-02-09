@@ -11,6 +11,7 @@ namespace SystemServiceAPICore3.Bo.Interface
     public interface IAuthenticationBo
     {
         Task<Account> GetUser(string username, string password);
+
         void UpdateRefreshToken(Account account);
     }
 }

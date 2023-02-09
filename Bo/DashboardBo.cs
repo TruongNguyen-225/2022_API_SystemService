@@ -6,25 +6,43 @@ using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Context;
 using SystemServiceAPI.Dto.BaseResult;
+using SystemServiceAPI.Entities.Table;
+using SystemServiceAPICore3.Bo;
+using SystemServiceAPICore3.Dto;
 
 namespace SystemServiceAPI.Bo
 {
-    public class DashboardBo : IDashboard
+    public class DashboardBo : BaseBo<CustomerDto, Customer>, IDashboard
     {
-        private readonly AppDbContext _dbContext;
-        public DashboardBo(AppDbContext dbContext)
+        #region --- Verriable ---
+
+        private readonly IBillBo billBo;
+
+        #endregion
+
+        #region --- Constructor ---
+
+        public DashboardBo(IServiceProvider serviceProvider, IBillBo billBo):base(serviceProvider)
         {
-            _dbContext = dbContext;
+            this.billBo = billBo;
         }
 
-        public async Task<object> GetValueDashboard(int month)
+        #endregion
+
+        #region  --- Implements 
+
+
+        #endregion
+
+        public async Task<object> GetValueDashboard(int? month, int? year)
         {
-            int countTransaction = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Count();
-            int currentCost = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Money).Sum();
-            int currentRecive = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Total).Sum();
-            int currentProfit = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Postage).Sum();
-            int totalBudget = _dbContext.vw_MonthlyTransactions.Select(X => X.Postage).Sum();
-            int countMonthDone = _dbContext.vw_MonthlyTransactions.GroupBy(x => x.Month).Select(x => x.Key).Count();
+            var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
+            int countTransaction = vwMonthlyTransaction.Count();
+            int currentCost = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Money).Sum() ;
+            int currentRecive = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Total).Sum();
+            int currentProfit = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Postage).Sum();
+            int totalBudget = (int)vwMonthlyTransaction.Select(x => x.Postage).Sum();
+            int countMonthDone = vwMonthlyTransaction.GroupBy(x => x.Month).Select(x => x.Key).Count();
 
             Dictionary<string, int> result = new Dictionary<string, int>();
             result.Add("CountTransaction", countTransaction);
@@ -37,70 +55,66 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(result);
         }
 
-        public async Task<object> GetBarChart(int take)
+
+        public async Task<object> GetPieChart(int? month, int? year)
         {
-            ResponseResults response = new ResponseResults();
+            var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
+            var tblRetail = GetQueryable<Retail>();
 
-            try
-            {
-                var data = _dbContext.vw_DataBarCharts.OrderByDescending(x => x.Year).ThenByDescending(x => x.Month).Take(take);
+            var vwPieChart = from x in vwMonthlyTransaction
+                             from r in tblRetail.Where(r => r.RetailID == x.RetailID).DefaultIfEmpty()
+                             group x by new
+                             {
+                                 x.RetailID,
+                                 x.RetailName,
+                                 x.Month,
+                                 x.Year
+                             } into gcs
+                             select new
+                             {
+                                 RetailID = gcs.Key.RetailID,
+                                 RetailName = gcs.Key.RetailName,
+                                 Money = vwMonthlyTransaction.Select(x => x.Money).Sum(),
+                                 Postage = vwMonthlyTransaction.Select(x => x.Postage).Sum(),
+                                 Total = vwMonthlyTransaction.Select(x => x.Total).Sum(),
+                                 Month = gcs.Key.Month,
+                                 Year = gcs.Key.Year,
+                                 Time = gcs.Key.Month > 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
+                             };
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = "ERROR";
-            }
-
-            return await Task.FromResult(response);
+            return await Task.FromResult(vwPieChart);
         }
 
-        public async Task<object> GetPieChart(int month)
+        public async Task<object> GetBarChart(int take, int? month, int? year)
         {
-            ResponseResults response = new ResponseResults();
+            var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
+            var tblRetail = GetQueryable<Retail>();
+            var vwPieChart = GetPieChart(month, year);
+            //TODO
 
-            try
-            {
-                var data = _dbContext.vw_PieCharts.Where(x => x.Month == month && x.Year == DateTime.Now.Year).OrderBy(x => x.RetailID).FirstOrDefault();
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = "ERROR";
-            }
-
-            return await Task.FromResult(response);
+            return await Task.FromResult(default(object));
         }
 
-        public async Task<object> GetPieChartService(int month)
-        {
-            ResponseResults response = new ResponseResults();
+        //public async Task<object> GetPieChartService(int month)
+        //{
+        //    ResponseResults response = new ResponseResults();
 
-            try
-            {
-                var data = _dbContext.vw_PieChartServices.Where(x => x.Month == month && x.Year == DateTime.Now.Year).OrderBy(x => x.ServiceID).FirstOrDefault();
+        //    try
+        //    {
+        //        var data = _dbContext.vw_PieChartServices.Where(x => x.Month == month && x.Year == DateTime.Now.Year).OrderBy(x => x.ServiceID).FirstOrDefault();
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = data;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = "ERROR";
-            }
+        //        response.Code = (int)HttpStatusCode.OK;
+        //        response.Result = data;
+        //        response.Msg = "SUCCESS";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.Code = (int)HttpStatusCode.InternalServerError;
+        //        response.Result = null;
+        //        response.Msg = "ERROR";
+        //    }
 
-            return await Task.FromResult(response);
-        }
+        //    return await Task.FromResult(response);
+        //}
     }
 }

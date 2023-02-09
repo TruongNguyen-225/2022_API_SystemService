@@ -54,7 +54,8 @@ namespace SystemServiceAPI.Bo
             var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionQueryable
                                                    from customer in viewCustomerQueryable.
                                                    Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
-                                                   where transaction.DateTimeAdd.Month == (month.HasValue ? month : currentMonth) && transaction.DateTimeAdd.Year == (year.HasValue ? year : currentYear)
+                                                   where transaction.DateTimeAdd.Month == (month.HasValue ? month : currentMonth)
+                                                   && transaction.DateTimeAdd.Year == (year.HasValue ? year : currentYear)
                                                    //orderby transaction.ID descending
                                                    select new MonthlyTransactionResponse
                                                    {

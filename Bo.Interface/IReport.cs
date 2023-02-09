@@ -1,16 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.Report;
+using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPI.Bo.Interface
 {
     public interface IReport
     {
-        Task<ResponseResults> GetByCondition(ReportRequestDto req);
+        Task<List<MonthlyTransactionResponse>> GetByCondition(ReportRequestDto req);
 
-        Task<ResponseResults> HistoryReport();
+        Task<object> HistoryReport();
 
-        byte[] Export (ExportDto req);
+        Task<byte[]> ExportAsync(ReportRequestDto req);
 
         byte[] TestExport();
     }
