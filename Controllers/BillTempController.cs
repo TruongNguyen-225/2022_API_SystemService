@@ -226,14 +226,13 @@ namespace SystemServiceAPI.Controllers
                     return File(result.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
                 }
 
-                return null;
+                return BadRequest();
             }
             catch
             {
                 throw;
             }
         }
-
 
         [HttpGet]
         [Route("TestXML")]

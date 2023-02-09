@@ -431,6 +431,7 @@ namespace SystemServiceAPI.Bo
                                     temp.DateTimeAdd.Month == month
                                     && temp.DateTimeAdd.Year == year
                                     && temp.ServiceID == serviceID
+                                    && temp.Status != 2  //2 : printed
                                 orderby temp.RetailID
                                 select new
                                 {
@@ -468,8 +469,8 @@ namespace SystemServiceAPI.Bo
                 cellParam = cellParams
             };
 
-            //string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
-            string pathTemplate = @"https://latex.itdvgroup.com/Report/Template/initBillTemplate.xlsx";
+            string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+            //string pathTemplate = @"https://latex.itdvgroup.com/Report/Template/initBillTemplate.xlsx";
             byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
 
             return excel;

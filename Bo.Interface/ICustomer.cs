@@ -17,7 +17,7 @@ namespace SystemServiceAPI.Bo.Interface
 
         Task<object> GetBillElectricByCustomerID(int customerID);
 
-        Task<Customer> GetCustomer(int customerID);
+        Task<object> GetCustomer(int customerID);
 
         Task<object> GetCustomerByServiceID(int serviceID);
 
