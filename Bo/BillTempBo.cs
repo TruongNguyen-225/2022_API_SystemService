@@ -41,14 +41,15 @@ namespace SystemServiceAPI.Bo
         #region -- Overrides --
         #endregion
 
-        public IQueryable<MonthlyTransactionTemp> GetDataTempByMonth(int month)
+        public IQueryable<MonthlyTransactionTemp> GetDataTempByMonth(int? month)
         {
             int currentMonth = DateTime.Now.Month;
             int year = DateTime.Now.Year;
 
             var monthlyTransactionTemp = GetQueryable<MonthlyTransactionTemp>();
             var transactionQueryable = from transaction in monthlyTransactionTemp
-                                       where transaction.DateTimeAdd.Month == month && transaction.DateTimeAdd.Year == (month == 12 ? year - 1 : year)
+                                       where transaction.DateTimeAdd.Month == (month != null ? month.Value : currentMonth) 
+                                            && transaction.DateTimeAdd.Year == (month != null ? (month.Value == 12 ? year - 1 : year) : (year))
                                        orderby transaction.RetailID descending
                                        select transaction;
 

@@ -11,7 +11,7 @@ namespace SystemServiceAPI.Bo.Interface
 {
     public interface IBillTempBo
     {
-        IQueryable<MonthlyTransactionTemp> GetDataTempByMonth(int month);
+        IQueryable<MonthlyTransactionTemp> GetDataTempByMonth(int? month);
 
         Task<bool> CheckBeforeAddBillElectricity(int serviceID, string code);
 

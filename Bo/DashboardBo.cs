@@ -19,37 +19,22 @@ namespace SystemServiceAPI.Bo
 
         public async Task<object> GetValueDashboard(int month)
         {
-            ResponseResults response = new ResponseResults();
+            int countTransaction = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Count();
+            int currentCost = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Money).Sum();
+            int currentRecive = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Total).Sum();
+            int currentProfit = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Postage).Sum();
+            int totalBudget = _dbContext.vw_MonthlyTransactions.Select(X => X.Postage).Sum();
+            int countMonthDone = _dbContext.vw_MonthlyTransactions.GroupBy(x => x.Month).Select(x => x.Key).Count();
 
-            try
-            {
-                int countTransaction = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Count();
-                int currentCost = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Money).Sum();
-                int currentRecive = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Total).Sum();
-                int currentProfit = _dbContext.vw_MonthlyTransactions.Where(x => x.Month == month && x.Year == DateTime.Now.Year).Select(X => X.Postage).Sum();
-                int totalBudget = _dbContext.vw_MonthlyTransactions.Select(X => X.Postage).Sum();
-                int countMonthDone = _dbContext.vw_MonthlyTransactions.GroupBy(x => x.Month).Select(x=>x.Key).Count();
+            Dictionary<string, int> result = new Dictionary<string, int>();
+            result.Add("CountTransaction", countTransaction);
+            result.Add("CurrentCost", currentCost);
+            result.Add("CurrentRecive", currentRecive);
+            result.Add("CurrentProfit", currentProfit);
+            result.Add("TotalBudget", totalBudget);
+            result.Add("CountMonthDone", countMonthDone);
 
-                Dictionary<string, int> result = new Dictionary<string, int>();
-                result.Add("CountTransaction", countTransaction);
-                result.Add("CurrentCost", currentCost);
-                result.Add("CurrentRecive", currentRecive);
-                result.Add("CurrentProfit", currentProfit);
-                result.Add("TotalBudget", totalBudget);
-                result.Add("CountMonthDone", countMonthDone);
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Result = result;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Result = null;
-                response.Msg = "ERROR";
-            }
-
-            return await Task.FromResult(response);
+            return await Task.FromResult(result);
         }
 
         public async Task<object> GetBarChart(int take)

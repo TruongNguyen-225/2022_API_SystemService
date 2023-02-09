@@ -58,12 +58,12 @@ namespace SystemServiceAPI.Controllers
         /// <param name="month"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetDataTempByMonth/{month}")]
-        public object GetDataTempByMonth(int month)
+        [Route("GetDataTempByMonth")]
+        public object GetDataTempByMonth()
         {
             try
             {
-                var queryable = billTempBo.GetDataTempByMonth(month);
+                var queryable = billTempBo.GetDataTempByMonth(null);
 
                 return Ok(new
                 {
