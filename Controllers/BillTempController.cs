@@ -213,13 +213,13 @@ namespace SystemServiceAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("PrintBillElectricInit")]
-        public async Task<object> PrintBillElectricInit()
+        [HttpGet]
+        [Route("PrintBillElectricInit/{url}")]
+        public async Task<object> PrintBillElectricInit(string urlTemplate)
         {
             try
             {
-                var result = billTempBo.PrintBillElectricInit();
+                var result = billTempBo.PrintBillElectricInit(urlTemplate);
 
                 if (result != null)
                 {
@@ -232,17 +232,6 @@ namespace SystemServiceAPI.Controllers
             {
                 throw;
             }
-        }
-
-        [HttpGet]
-        [Route("TestXML")]
-        public async Task<Dictionary<string, int>> TestXML()
-        {
-            List<string> listCode = new List<string>();
-
-            Dictionary<string, int> a = await billTempBo.GetTotalBillElectric(listCode);
-
-            return a;
         }
     }
 }

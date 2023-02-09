@@ -1,24 +1,16 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using System.Xml;
-using DocumentFormat.OpenXml.Drawing;
-using HtmlAgilityPack;
-using Microsoft.EntityFrameworkCore;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Context;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
-using SystemServiceAPI.Entities.View;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
-using SystemServiceAPICore3.Dto.Other;
 using SystemServiceAPICore3.Utilities;
 using SystemServiceAPICore3.Utilities.Constants;
 
@@ -85,9 +77,13 @@ namespace SystemServiceAPI.Bo
                     var text = element.FirstOrDefault().InnerText.Trim().Replace("\n", "").Replace("\r", "");
                     var search = "Tổng tiền:";
                     temp = text.Substring(text.IndexOf(search) + search.Length);
-                    temp = temp.Split(' ')[0].Replace(".","");
+                    temp = temp.Split(' ')[1].Replace(".","");
                     money = DataAccess.CorrectValue(temp, 0);
-                    result.Add(code, money);
+
+                    if (!result.ContainsKey(item))
+                    {
+                        result.Add(item, money);
+                    }
                 }
             }
 
@@ -164,7 +160,6 @@ namespace SystemServiceAPI.Bo
                 {
                     var transactionsCurrentTemp = transactionQueryable.ToArray();
                     monthlyTransactionTempRepo.Delete(transactionsCurrentTemp);
-                    monthlyTransactionTempRepo.Save();
                 }
 
                 BillFilterDto request = new BillFilterDto
@@ -188,13 +183,16 @@ namespace SystemServiceAPI.Bo
                     }
 
                     Dictionary<string, int> result = await GetTotalBillElectric(listCode);
+                    DateTime dateTime = DateTime.Now;
 
                     foreach (var item in transactions)
                     {
                         if (result.ContainsKey(item.Code))
                         {
-                            item.Total = result.GetValueOrDefault(item.Code) + item.Postage;
                             item.Money = result.GetValueOrDefault(item.Code);
+                            item.Total = result.GetValueOrDefault(item.Code) + item.Postage;
+                            item.DateTimeAdd = dateTime;
+
                             MonthlyTransactionTemp entity = mapper.Map<MonthlyTransactionTemp>(item);
 
                             monthlyTransactionTempRepo.Insert(entity);
@@ -414,7 +412,7 @@ namespace SystemServiceAPI.Bo
             return excel;
         }
 
-        public byte[] PrintBillElectricInit()
+        public byte[] PrintBillElectricInit(string pathTemplate)
         {
             var tblCustomer = GetQueryable<Customer>();
             var tblBillTemp = GetQueryable<MonthlyTransactionTemp>();
@@ -470,12 +468,34 @@ namespace SystemServiceAPI.Bo
                 cellParam = cellParams
             };
 
-            string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+            if(String.IsNullOrEmpty(pathTemplate))
+            {
+                pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+            }
+
+            //string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
             //string pathTemplate = @"https://latex.itdvgroup.com/Report/Template/initBillTemplate.xlsx";
             byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
 
             //update bill printed
+            var listID = new List<int>();
+            var tblTempRepo = GetRepository<MonthlyTransactionTemp>();
+            foreach(var item in listBillTemp)
+            {
+                listID.Add(item.ID);
+            }
 
+            var dataPrinted = (from temp in tblBillTemp
+                              where listID.Contains(temp.ID)
+                              select temp).ToList();
+
+            foreach(var data in dataPrinted)
+            {
+                data.Status = 2;
+                tblTempRepo.Update(data);
+            }
+
+            tblTempRepo.Save();
 
             //return byte[] response.
             return excel;

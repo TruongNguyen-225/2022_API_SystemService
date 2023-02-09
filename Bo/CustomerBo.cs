@@ -131,9 +131,9 @@ namespace SystemServiceAPI.Bo
         /// </summary>
         /// <param name="customerID"></param>
         /// <returns></returns>
-        public async Task<object> GetCustomer(int customerID)
+        public async Task<Customer> GetCustomer(int customerID)
         {
-            var customerQueryable = GetQueryableViewCustomer();
+            var customerQueryable = GetQueryable<Customer>();
             var customer = await customerQueryable
                                     .Where(x => x.CustomerID == customerID && x.IsDelete == false)
                                     .FirstOrDefaultAsync();

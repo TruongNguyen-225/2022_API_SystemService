@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SystemServiceAPI.Dto;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Dto.CustomerID;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPICore3.Profiles
 {
@@ -36,6 +33,7 @@ namespace SystemServiceAPICore3.Profiles
 
             CreateMap<BillUpdateDto, MonthlyTransaction>().ReverseMap();
             CreateMap<BillUpdateDto, MonthlyTransactionTemp>().ReverseMap();
+            CreateMap<MonthlyTransactionResponse, MonthlyTransactionTemp>().ForMember(x => x.ID, opt => opt.Ignore()).ReverseMap();
         }
     }
 }
