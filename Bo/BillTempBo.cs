@@ -435,6 +435,7 @@ namespace SystemServiceAPI.Bo
                                 orderby temp.RetailID
                                 select new
                                 {
+                                    ID = temp.ID,
                                     FullName = customer.FullName,
                                     Code = customer.Code,
                                     Money = temp.Money,
@@ -473,6 +474,10 @@ namespace SystemServiceAPI.Bo
             //string pathTemplate = @"https://latex.itdvgroup.com/Report/Template/initBillTemplate.xlsx";
             byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
 
+            //update bill printed
+
+
+            //return byte[] response.
             return excel;
         }
 
