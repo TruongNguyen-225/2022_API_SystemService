@@ -471,7 +471,7 @@ namespace SystemServiceAPI.Bo
 
             if(String.IsNullOrEmpty(pathTemplate))
             {
-                pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
+                pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill_Retail1.xlsx";
             }
 
             //string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";

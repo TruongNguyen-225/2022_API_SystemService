@@ -37,9 +37,9 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Export")]
-        public FileResult Export([FromBody] ExportDto req)
+        public async Task<FileResult> Export([FromBody] ReportRequestDto req)
         {
-            byte[] res = _reportBo.Export(req);
+            byte[] res = await _reportBo.ExportAsync(req);
             if (res != null)
             {
                 return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
