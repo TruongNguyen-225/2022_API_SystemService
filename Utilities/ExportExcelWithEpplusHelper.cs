@@ -1,10 +1,10 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
 using SystemServiceAPICore3.Utilities.Constants;
 
 namespace SystemServiceAPICore3.Utilities
@@ -61,13 +61,8 @@ namespace SystemServiceAPICore3.Utilities
             //ExcelWorksheet anotherWorksheet = excelPackage.Workbook.Worksheets.FirstOrDefault(x => x.Name == "SomeWorksheet");
 
             //Get the content from cells A1 and B1 as string, in two different notations
-            string retailName = paramDefault.fileNameParam.FileName;
-            string fromDate = paramDefault.fileNameParam.FromDate;
-            string toDate = paramDefault.fileNameParam.ToDate;
-            string timeExport = paramDefault.fileNameParam.TimeExport.ToString("dd-MM-yyyy hh:mm");
-
-            firstWorksheet.Cells[3, 1].Value = String.Format(ExportExcelConstants.FILE_NAME_TRANSACTION_FILE_NAME, retailName, fromDate, toDate);
-            firstWorksheet.Cells[4, 1].Value = timeExport;
+            firstWorksheet.Cells[4, 2].Value = paramDefault.fileNameParam.FileName;
+            firstWorksheet.Cells[5, 2].Value = "Thời gian tạo báo cáo : " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
             if (dataTable != null && dataTable.Rows.Count > 0)
             {
@@ -77,6 +72,8 @@ namespace SystemServiceAPICore3.Utilities
                 int startRow = paramDefault.cellParam.StartRow;
                 int startColumn = paramDefault.cellParam.StartColumn;
                 int maxColumn = paramDefault.cellParam.MaxColumn;
+                string valueString = String.Empty;
+                int sumMoney = 0;
 
                 foreach (DataRow row in dataTable.Rows)
                 {
@@ -92,34 +89,50 @@ namespace SystemServiceAPICore3.Utilities
 
                     for (int i = 1; i <= maxColumn; i++)
                     {
-                        valueCell = firstWorksheet.Cells[nextRow, i].Value.ToString();
+                        var cell = firstWorksheet.Cells[nextRow, i].Value;
 
-                        if (!String.IsNullOrEmpty(valueCell) && valueCell.Contains(ExportExcelConstants.TEXT_MARKER))
+                        if(cell != null)
                         {
-                            columnName = valueCell.Replace(ExportExcelConstants.TEXT_MARKER, String.Empty);
-                            object type = row[columnName].GetType();
-                            var value = DataAccess.CorrectValue(row[columnName], type).ToString();
+                            valueCell = cell.ToString();
 
-                            int output;
-                            bool success = int.TryParse(value, out output);
+                            if (!String.IsNullOrEmpty(valueCell) && valueCell.Contains(ExportExcelConstants.TEXT_MARKER))
+                            {
+                                columnName = valueCell.Replace(ExportExcelConstants.TEXT_MARKER, String.Empty);
+                                Type type = row[columnName].GetType();
 
-                            if (success)
-                            {
-                                firstWorksheet.Cells[nextRow, i].Value = output;
-                                firstWorksheet.Cells[nextRow, i].Style.Numberformat.Format = "#";
-                            }
-                            else
-                            {
-                                firstWorksheet.Cells[nextRow, i].Value = value;
+                                if(type.Name != "DBNull")
+                                {
+                                    valueString = DataAccess.CorrectValue(row[columnName], type).ToString();
+                                }
+                                
+                                int output;
+                                bool success = int.TryParse(valueString, out output);
+
+                                if (success)
+                                {
+                                    if (columnName == "Total")
+                                    {
+                                        sumMoney += output;
+                                    }
+
+                                    firstWorksheet.Cells[nextRow, i].Value = output;
+                                    firstWorksheet.Cells[nextRow, i].Style.Numberformat.Format = "#";
+                                }
+                                else
+                                {
+                                    firstWorksheet.Cells[nextRow, i].Value = valueString;
+                                }
                             }
                         }
                     }
                 }
 
+                firstWorksheet.Rows.Height = 25;
                 firstWorksheet.DeleteRow(startRow, 1);
 
                 //Add thêm dòng tính sum
-                //firstWorksheet.Cells[startRow, startColumn].Copy(firstWorksheet.Cells[startRow + 1, startColumn]);
+                firstWorksheet.Cells[startRow + dataTable.Rows.Count + 1, startColumn + 3].Value = "TỔNG TIỀN DỊCH VỤ TÍNH ĐƯỢC LÀ : ";
+                firstWorksheet.Cells[startRow + dataTable.Rows.Count + 1, startColumn + 8].Value = sumMoney;
             }
         }
 

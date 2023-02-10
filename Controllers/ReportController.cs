@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
@@ -35,10 +36,21 @@ namespace SystemServiceAPI.Controllers
         /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         [Route("Export")]
-        public async Task<FileResult> Export([FromBody] ReportRequestDto req)
+        public async Task<FileResult> Export()
         {
+            DateTime startDate = new DateTime(2023, 02, 01);
+            DateTime endDate = new DateTime(2023, 02, 28);
+
+            ReportRequestDto req = new ReportRequestDto
+            {
+                ServiceID = 100,
+                RetailID = 2,
+                StartTime = startDate,
+                EndTime = endDate
+            };
+
             byte[] res = await _reportBo.ExportAsync(req);
             if (res != null)
             {

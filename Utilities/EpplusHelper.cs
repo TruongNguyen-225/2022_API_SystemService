@@ -72,8 +72,6 @@ namespace SystemServiceAPICore3.Utilities
                                 }    
                             }    
                         }
-
-                        
                     }    
 
                     //Save your file

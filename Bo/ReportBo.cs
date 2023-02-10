@@ -1,16 +1,12 @@
 ﻿using System;
+using System.Web;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Drawing;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Context;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.Report;
 using SystemServiceAPI.Entities.Table;
-using SystemServiceAPI.Entities.View;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
 using SystemServiceAPICore3.Dto.Other;
@@ -37,39 +33,46 @@ namespace SystemServiceAPI.Bo
             var retailID = req.RetailID;
             var endDate = req.EndTime;
 
-            var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
+            //var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
+            var customerQueryable = GetQueryable<Customer>();
+            var bankQueryable = GetQueryable<Bank>();
+            var retailQueryable = GetQueryable<Retail>();
+            var serviceQueryable = GetQueryable<Service>();
 
             var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionQueryable
-                                                   from customer in viewCustomerQueryable.
-                                                   Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
-                                                   where serviceID > 6 ? true : transaction.ServiceID == serviceID
-                                                   && transaction.RetailID == req.RetailID
+                                                   from customer in customerQueryable.Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty().Where(x => !x.IsDelete)
+                                                   from retail in retailQueryable.Where(x => x.RetailID == transaction.RetailID).DefaultIfEmpty()
+                                                   from service in serviceQueryable.Where(x => x.ServiceID == transaction.ServiceID).DefaultIfEmpty()
+                                                   from bank in bankQueryable.Where(x => x.BankID == transaction.BankID).DefaultIfEmpty()
+                                                   where transaction.RetailID == req.RetailID
                                                    && transaction.DateTimeAdd.Date >= startDate
                                                    && transaction.DateTimeAdd.Date <= endDate
+                                                   && serviceID > 6 ? true : transaction.ServiceID == serviceID
                                                    orderby transaction.ServiceID descending
                                                    orderby transaction.DateTimeAdd ascending
                                                    select new MonthlyTransactionResponse
                                                    {
                                                        STT = 1,
                                                        ID = transaction.ID,
-                                                       ServiceID = customer.ServiceID,
-                                                       ServiceName = customer.ServiceName,
-                                                       CustomerID = customer.CustomerID,
+                                                       ServiceID = transaction.ServiceID,
+                                                       ServiceName = service.ServiceName,
+                                                       CustomerID = transaction.CustomerID,
                                                        FullName = customer.FullName,
-                                                       Code = customer.Code,
-                                                       RetailID = customer.RetailID,
-                                                       RetailName = customer.RetailName,
+                                                       Code = transaction.Code,
+                                                       RetailID = transaction.RetailID,
+                                                       RetailName = retail.RetailName,
                                                        BankID = customer.BankID,
-                                                       BankName = customer.BankName,
+                                                       BankName = bank.ShortName,
                                                        Money = transaction.Money,
                                                        Postage = transaction.Postage,
-                                                       Total = transaction.Total,
+                                                       Total = transaction.ServiceID == 5 ? transaction.Postage - transaction.Money : transaction.Total,
                                                        Month = transaction.DateTimeAdd.Month,
                                                        Year = transaction.DateTimeAdd.Year,
                                                        DateTimeAdd = transaction.DateTimeAdd
                                                    });
 
+            var y = viewMonthlyTransactionQueryable.Where(z => z.ServiceID == 5).ToList();
             if (viewMonthlyTransactionQueryable.Any())
             {
                 return await Task.FromResult(viewMonthlyTransactionQueryable.ToList());
@@ -98,12 +101,42 @@ namespace SystemServiceAPI.Bo
             var retailID = req.RetailID;
             var endDate = req.EndTime;
 
+            string startTimeString = DateTimeHelper.ConvertDateTimeToString103(startDate);
+            string endTimeString = DateTimeHelper.ConvertDateTimeToString103(endDate);
+
             List<MonthlyTransactionResponse> data = await GetByCondition(req);
             DataTable dataTable = Utility.ToDataTable(data);
 
-            string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport.xlsx";
+            var tblRetail = GetQueryable<Retail>();
+            string retailName = tblRetail.Where(x => x.RetailID == retailID).Select(x => x.RetailName).FirstOrDefault();
 
-            return EpplusHelper.ExportExcel(pathTemplate, 8, 1, 11, "%", dataTable);
+            string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport.xlsx";
+            //string pathTemplate = @"C:\PROJECT\SS\TemplateExportDataReport.xlsx";
+
+            FileNameParams fileNameParams = new FileNameParams
+            {
+                FileName = String.Format(ExportExcelConstants.FILE_NAME_TRANSACTION_FILE_NAME, retailName.ToUpper(), startTimeString, endTimeString),
+                FromDate = startTimeString,
+                ToDate = endTimeString,
+                TimeExport = endDate,
+            };
+
+            CellParams cellParams = new CellParams
+            {
+                MaxColumn = 10,
+                StartColumn = 1,
+                StartRow = 8,
+            };
+
+            ExcelParamDefault excelParamDefault = new ExcelParamDefault
+            {
+                fileNameParam = fileNameParams,
+                cellParam = cellParams
+            };
+
+            byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, false);
+
+            return excel;
         }
 
         public byte[] TestExport()
