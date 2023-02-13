@@ -110,8 +110,8 @@ namespace SystemServiceAPI.Bo
             var tblRetail = GetQueryable<Retail>();
             string retailName = tblRetail.Where(x => x.RetailID == retailID).Select(x => x.RetailName).FirstOrDefault();
 
-            string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport.xlsx";
-            //string pathTemplate = @"C:\PROJECT\SS\TemplateExportDataReport.xlsx";
+            //string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport.xlsx";
+            string pathTemplate = @"C:\PROJECT\SS\TemplateExportDataReport.xlsx";
 
             FileNameParams fileNameParams = new FileNameParams
             {

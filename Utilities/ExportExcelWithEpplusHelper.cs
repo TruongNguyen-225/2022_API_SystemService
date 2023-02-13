@@ -110,13 +110,17 @@ namespace SystemServiceAPICore3.Utilities
 
                                 if (success)
                                 {
-                                    if (columnName == "Total")
-                                    {
-                                        sumMoney += output;
-                                    }
-
                                     firstWorksheet.Cells[nextRow, i].Value = output;
-                                    firstWorksheet.Cells[nextRow, i].Style.Numberformat.Format = "#";
+
+                                    if (columnName == "Money" || columnName == "Postage" || columnName == "Total")
+                                    {
+                                        if(columnName == "Total")
+                                        {
+                                            sumMoney += output;
+                                        }
+
+                                        firstWorksheet.Cells[nextRow, i].Style.Numberformat.Format = "#,##0";
+                                    }
                                 }
                                 else
                                 {
@@ -131,8 +135,16 @@ namespace SystemServiceAPICore3.Utilities
                 firstWorksheet.DeleteRow(startRow, 1);
 
                 //Add thêm dòng tính sum
-                firstWorksheet.Cells[startRow + dataTable.Rows.Count + 1, startColumn + 3].Value = "TỔNG TIỀN DỊCH VỤ TÍNH ĐƯỢC LÀ : ";
-                firstWorksheet.Cells[startRow + dataTable.Rows.Count + 1, startColumn + 8].Value = sumMoney;
+                int positionSumX = startRow + dataTable.Rows.Count + 1;
+                int postionSumY = startColumn;
+
+                firstWorksheet.Cells[positionSumX, postionSumY + 7].Value = "TỔNG TIỀN DỊCH VỤ TÍNH ĐƯỢC LÀ : ";
+                firstWorksheet.Cells[positionSumX, postionSumY + 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                firstWorksheet.Cells[positionSumX, postionSumY + 7].Style.Font.Bold = true;
+
+                firstWorksheet.Cells[positionSumX, postionSumY +8 ].Value = sumMoney;
+                firstWorksheet.Cells[positionSumX, postionSumY +8 ].Style.Numberformat.Format = "#,##0";
+                firstWorksheet.Cells[positionSumX, postionSumY +8 ].Style.Font.Bold = true;
             }
         }
 
@@ -218,6 +230,7 @@ namespace SystemServiceAPICore3.Utilities
             int nextStepColumn = 4;
             var rowSelected = 0;
             int maxRow = data.Rows.Count;
+            string valueString = String.Empty;
 
             for (int i = startColumn; i < maxColumn; i++)
             {
@@ -231,9 +244,30 @@ namespace SystemServiceAPICore3.Utilities
                     if (rowSelected < maxRow)
                     {
                         DataRow row = data.Rows[rowSelected];
-                        object type = row[columnName].GetType();
-                        var value = DataAccess.CorrectValue(row[columnName], type).ToString();
-                        activeSheet.Cells[rowExcelSelected, i].Value = value;
+                        Type type = row[columnName].GetType();
+
+                        if (type.Name != "DBNull")
+                        {
+                            valueString = DataAccess.CorrectValue(row[columnName], type).ToString();
+
+                            int output;
+                            bool success = int.TryParse(valueString, out output);
+
+                            if (success)
+                            {
+                                activeSheet.Cells[rowExcelSelected, i].Value = output;
+                                if (columnName == "Money" || columnName == "Postage" || columnName == "Total")
+                                {
+                                    activeSheet.Cells[rowExcelSelected, i].Style.Numberformat.Format = "#,##0";
+                                    activeSheet.Cells[rowExcelSelected, i].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                                }
+                            }
+                            else
+                            {
+                                activeSheet.Cells[rowExcelSelected, i].Value = valueString;
+                            }
+                        }
+
                         index++;
                     }
                 }
