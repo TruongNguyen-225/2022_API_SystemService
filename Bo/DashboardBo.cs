@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Context;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
@@ -22,7 +19,7 @@ namespace SystemServiceAPI.Bo
 
         #region --- Constructor ---
 
-        public DashboardBo(IServiceProvider serviceProvider, IBillBo billBo):base(serviceProvider)
+        public DashboardBo(IServiceProvider serviceProvider, IBillBo billBo) : base(serviceProvider)
         {
             this.billBo = billBo;
         }
@@ -38,7 +35,7 @@ namespace SystemServiceAPI.Bo
         {
             var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
             int countTransaction = vwMonthlyTransaction.Count();
-            int currentCost = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Money).Sum() ;
+            int currentCost = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Money).Sum();
             int currentRecive = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Total).Sum();
             int currentProfit = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Postage).Sum();
             int totalBudget = (int)vwMonthlyTransaction.Select(x => x.Postage).Sum();

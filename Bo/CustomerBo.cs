@@ -57,30 +57,30 @@ namespace SystemServiceAPI.Bo
             var customerRepository = GetRepository<Customer>();
 
             var queryable = (from customer in customerQueryable
-                          from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
-                          from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
-                          from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                          where customer.IsDelete == false
-                          //orderby customer.FullName ascending, customer.DateTimeAdd descending
-                          select new CustomerResponse
-                          {
-                              STT = 1,
-                              ServiceID = service.ServiceID,
-                              ServiceName = service.ServiceName,
-                              BankID = bank.BankID,
-                              BankName = bank.ShortName,
-                              CustomerID = customer.CustomerID,
-                              RetailID = retail.RetailID,
-                              RetailName = retail.RetailName,
-                              FullName = customer.FullName,
-                              Code = customer.Code,
-                              VillageID = customer.VillageID,
-                              Hotline = customer.Hotline,
-                              Status = customer.IsDelete ? "Đã xoá" : "Đang hoạt động",
-                              IsDelete = customer.IsDelete,
-                              DateTimeAdd = customer.DateTimeAdd,
-                              DateTimeUpdate = customer.DateTimeUpdate
-                          });
+                             from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
+                             from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
+                             from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
+                             where customer.IsDelete == false
+                             //orderby customer.FullName ascending, customer.DateTimeAdd descending
+                             select new CustomerResponse
+                             {
+                                 STT = 1,
+                                 ServiceID = service.ServiceID,
+                                 ServiceName = service.ServiceName,
+                                 BankID = bank.BankID,
+                                 BankName = bank.ShortName,
+                                 CustomerID = customer.CustomerID,
+                                 RetailID = retail.RetailID,
+                                 RetailName = retail.RetailName,
+                                 FullName = customer.FullName,
+                                 Code = customer.Code,
+                                 VillageID = customer.VillageID,
+                                 Hotline = customer.Hotline,
+                                 Status = customer.IsDelete ? "Đã xoá" : "Đang hoạt động",
+                                 IsDelete = customer.IsDelete,
+                                 DateTimeAdd = customer.DateTimeAdd,
+                                 DateTimeUpdate = customer.DateTimeUpdate
+                             });
 
             return queryable;
         }
@@ -99,7 +99,7 @@ namespace SystemServiceAPI.Bo
             var queryable = tempBo.GetDataTempByMonth(month);
             var dataTemp = queryable.Where(x => x.ServiceID == serviceID && x.CustomerID == customerID).FirstOrDefault();
 
-            if(dataTemp != null)
+            if (dataTemp != null)
             {
                 return await Task.FromResult(dataTemp);
             }
@@ -118,7 +118,7 @@ namespace SystemServiceAPI.Bo
         {
             var customerQueryable = GetQueryableViewCustomer();
             var result = customerQueryable.Where(x => x.CustomerID == customerID).FirstOrDefault();
-           
+
             return await Task.FromResult(result);
         }
 
@@ -261,10 +261,10 @@ namespace SystemServiceAPI.Bo
         {
             var customerQueryable = GetQueryableViewCustomer();
             var customer = customerQueryable
-                .Where(x => x.RetailID == retailID && (x.Code == code || x.Code == (CustomerConstants.DISTRICT_CODE_ELECTRIC + code )))
+                .Where(x => x.RetailID == retailID && (x.Code == code || x.Code == (CustomerConstants.DISTRICT_CODE_ELECTRIC + code)))
                 .FirstOrDefault();
 
-            if(customer != null)
+            if (customer != null)
             {
                 return await Task.FromResult(true);
             }
@@ -322,7 +322,7 @@ namespace SystemServiceAPI.Bo
             var customerRepository = GetRepository<Customer>();
             var customer = customerRepository.FindBy(x => x.CustomerID == customerID && x.IsDelete == false).FirstOrDefault();
 
-            if(customer != null)
+            if (customer != null)
             {
                 customer.IsDelete = true;
                 customer.DateTimeAdd = DateTime.Now;

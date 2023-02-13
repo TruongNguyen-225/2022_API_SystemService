@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.Report;
 using SystemServiceAPICore3.Dto.Other;
 

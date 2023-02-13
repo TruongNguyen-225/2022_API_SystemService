@@ -10,7 +10,7 @@ using SystemServiceAPICore3.Utilities.Constants;
 namespace SystemServiceAPICore3.Utilities
 {
     public static class ExportExcelWithEpplusHelper
-	{
+    {
         private const int FIRST_SHEET = 0;
         private const int MAX_BILL_PER_SHEET = 8;
 
@@ -91,7 +91,7 @@ namespace SystemServiceAPICore3.Utilities
                     {
                         var cell = firstWorksheet.Cells[nextRow, i].Value;
 
-                        if(cell != null)
+                        if (cell != null)
                         {
                             valueCell = cell.ToString();
 
@@ -100,11 +100,11 @@ namespace SystemServiceAPICore3.Utilities
                                 columnName = valueCell.Replace(ExportExcelConstants.TEXT_MARKER, String.Empty);
                                 Type type = row[columnName].GetType();
 
-                                if(type.Name != "DBNull")
+                                if (type.Name != "DBNull")
                                 {
                                     valueString = DataAccess.CorrectValue(row[columnName], type).ToString();
                                 }
-                                
+
                                 int output;
                                 bool success = int.TryParse(valueString, out output);
 
@@ -114,7 +114,7 @@ namespace SystemServiceAPICore3.Utilities
 
                                     if (columnName == "Money" || columnName == "Postage" || columnName == "Total")
                                     {
-                                        if(columnName == "Total")
+                                        if (columnName == "Total")
                                         {
                                             sumMoney += output;
                                         }
@@ -142,9 +142,9 @@ namespace SystemServiceAPICore3.Utilities
                 firstWorksheet.Cells[positionSumX, postionSumY + 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
                 firstWorksheet.Cells[positionSumX, postionSumY + 7].Style.Font.Bold = true;
 
-                firstWorksheet.Cells[positionSumX, postionSumY +8 ].Value = sumMoney;
-                firstWorksheet.Cells[positionSumX, postionSumY +8 ].Style.Numberformat.Format = "#,##0";
-                firstWorksheet.Cells[positionSumX, postionSumY +8 ].Style.Font.Bold = true;
+                firstWorksheet.Cells[positionSumX, postionSumY + 8].Value = sumMoney;
+                firstWorksheet.Cells[positionSumX, postionSumY + 8].Style.Numberformat.Format = "#,##0";
+                firstWorksheet.Cells[positionSumX, postionSumY + 8].Style.Font.Bold = true;
             }
         }
 
@@ -339,7 +339,7 @@ namespace SystemServiceAPICore3.Utilities
 
                 foreach (var item in data)
                 {
-                    index ++;
+                    index++;
                     var nextRow = startRow + index;
 
                     //copy tại rowStart => paste tại rowStart + 1

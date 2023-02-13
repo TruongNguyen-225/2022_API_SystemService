@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SystemServiceAPI.Bo;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BillDto;
-using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Utilities.Constants;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

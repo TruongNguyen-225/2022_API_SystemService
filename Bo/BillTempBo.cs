@@ -48,7 +48,7 @@ namespace SystemServiceAPI.Bo
 
             var monthlyTransactionTemp = GetQueryable<MonthlyTransactionTemp>();
             var transactionQueryable = from transaction in monthlyTransactionTemp
-                                       where transaction.DateTimeAdd.Month == (month != null ? month.Value : currentMonth) 
+                                       where transaction.DateTimeAdd.Month == (month != null ? month.Value : currentMonth)
                                             && transaction.DateTimeAdd.Year == (month != null ? (month.Value == 12 ? year - 1 : year) : (year))
                                        orderby transaction.RetailID descending
                                        select transaction;
@@ -78,7 +78,7 @@ namespace SystemServiceAPI.Bo
                     var text = element.FirstOrDefault().InnerText.Trim().Replace("\n", "").Replace("\r", "");
                     var search = "Tổng tiền:";
                     temp = text.Substring(text.IndexOf(search) + search.Length);
-                    temp = temp.Split(' ')[1].Replace(".","");
+                    temp = temp.Split(' ')[1].Replace(".", "");
                     money = DataAccess.CorrectValue(temp, 0);
 
                     if (!result.ContainsKey(item))
@@ -469,7 +469,7 @@ namespace SystemServiceAPI.Bo
                 cellParam = cellParams
             };
 
-            if(String.IsNullOrEmpty(pathTemplate))
+            if (String.IsNullOrEmpty(pathTemplate))
             {
                 //pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill_Retail1.xlsx";
                 pathTemplate = @"C:\Users\TruongNV75\Documents\FPT\test.xlsx";
@@ -482,16 +482,16 @@ namespace SystemServiceAPI.Bo
             //update bill printed
             var listID = new List<int>();
             var tblTempRepo = GetRepository<MonthlyTransactionTemp>();
-            foreach(var item in listBillTemp)
+            foreach (var item in listBillTemp)
             {
                 listID.Add(item.ID);
             }
 
             var dataPrinted = (from temp in tblBillTemp
-                              where listID.Contains(temp.ID)
-                              select temp).ToList();
+                               where listID.Contains(temp.ID)
+                               select temp).ToList();
 
-            foreach(var data in dataPrinted)
+            foreach (var data in dataPrinted)
             {
                 data.Status = 2;
                 tblTempRepo.Update(data);

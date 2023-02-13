@@ -15,7 +15,7 @@ namespace SystemServiceAPI.Controllers
     public class DashboardController : BaseController<CustomerDto>
     {
         private readonly IDashboard _dashboardBo;
-        public DashboardController(IServiceProvider serviceProvider, IDashboard dashboardBo) :base(serviceProvider)
+        public DashboardController(IServiceProvider serviceProvider, IDashboard dashboardBo) : base(serviceProvider)
         {
             _dashboardBo = dashboardBo;
         }
@@ -27,7 +27,7 @@ namespace SystemServiceAPI.Controllers
             try
             {
                 var result = await _dashboardBo.GetValueDashboard(month, null);
-                
+
                 return Ok(new
                 {
                     Result = result,

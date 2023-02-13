@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPI.Entities.Table;
-using SystemServiceAPI.Entities.View;
 
 namespace SystemServiceAPI.Bo.Interface
 {

@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.BillDto;
-using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Controllers;
 using SystemServiceAPICore3.Dto;
 using SystemServiceAPICore3.Utilities.Constants;

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Dto.BillDto;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -40,7 +36,7 @@ namespace SystemServiceAPI.Controllers
 
                 return NoContent();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogInformation(ex.Message);
                 throw;
@@ -111,4 +107,3 @@ namespace SystemServiceAPI.Controllers
         }
     }
 }
-

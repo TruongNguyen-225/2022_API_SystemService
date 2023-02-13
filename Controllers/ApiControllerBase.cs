@@ -1,13 +1,13 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SystemServiceAPICore3.Bo.Interface;
 using SystemServiceAPICore3.Domain.Helpers;
 using SystemServiceAPICore3.Logging.Interfaces;
-using System.Linq;
 
 namespace SystemServiceAPICore3.Controllers
 {
@@ -242,4 +242,3 @@ namespace SystemServiceAPICore3.Controllers
         #endregion
     }
 }
-

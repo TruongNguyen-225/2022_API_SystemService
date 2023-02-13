@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SystemServiceAPI.Dto;
+﻿using System.Threading.Tasks;
 using SystemServiceAPI.Entities.Table;
-using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPICore3.Bo.Interface
 {

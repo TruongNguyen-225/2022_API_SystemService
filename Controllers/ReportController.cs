@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.Report;
-using SystemServiceAPI.Helpers;
 
 namespace SystemServiceAPI.Controllers
 {

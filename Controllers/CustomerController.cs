@@ -1,10 +1,6 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using SystemServiceAPI.Bo;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.CustomerID;
 using SystemServiceAPI.Entities.Table;

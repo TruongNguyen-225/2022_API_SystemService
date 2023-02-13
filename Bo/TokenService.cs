@@ -3,11 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using SystemServiceAPICore3.Bo.Interface;
 
 namespace SystemServiceAPICore3.Bo
@@ -16,7 +14,7 @@ namespace SystemServiceAPICore3.Bo
     {
         private IConfiguration configuration;
 
-        public  TokenService(IConfiguration configuration)
+        public TokenService(IConfiguration configuration)
         {
             this.configuration = configuration;
         }

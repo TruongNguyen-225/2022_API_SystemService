@@ -23,18 +23,18 @@ namespace SystemServiceAPICore3.Controllers
             this.configuration = configuration;
             this.tokenService = tokenService;
         }
-        
+
         [HttpPost]
         [Route("Login")]
         public async Task<object> Login([FromBody] AuthenticationDto auth)
         {
             string userName = auth.Username;
             string password = auth.Password;
-            
-            if(!String.IsNullOrEmpty(userName) && !String.IsNullOrEmpty(password))
+
+            if (!String.IsNullOrEmpty(userName) && !String.IsNullOrEmpty(password))
             {
                 Account account = await authenticationBo.GetUser(userName, password);
-                if(account != null)
+                if (account != null)
                 {
                     var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
@@ -60,7 +60,7 @@ namespace SystemServiceAPICore3.Controllers
                         Token = accessToken,
                         RefreshToken = refreshToken,
                         Expried = DateTime.Now.AddHours(1)
-                    }) ;
+                    });
                 }
 
                 return Unauthorized();
