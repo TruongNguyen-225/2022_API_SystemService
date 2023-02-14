@@ -117,7 +117,7 @@ namespace SystemServiceAPI.Bo
         public async Task<object> GetCustomerByID(int customerID)
         {
             var customerQueryable = GetQueryableViewCustomer();
-            var result = customerQueryable.Where(x => x.CustomerID == customerID).FirstOrDefault();
+            var result = customerQueryable.Where(x => x.CustomerID == customerID).ToList();
 
             return await Task.FromResult(result);
         }

@@ -35,9 +35,9 @@ namespace SystemServiceAPI.Bo
         {
             var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
             int countTransaction = vwMonthlyTransaction.Count();
-            int currentCost = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Money).Sum();
-            int currentRecive = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Total).Sum();
-            int currentProfit = (int)vwMonthlyTransaction.Where(x => x.Month == month.Value && x.Year == year.Value).Select(x => x.Postage).Sum();
+            int currentCost = (int)vwMonthlyTransaction.Select(x => x.Money).Sum();
+            int currentRecive = (int)vwMonthlyTransaction.Select(x => x.Total).Sum();
+            int currentProfit = (int)vwMonthlyTransaction.Select(x => x.Postage).Sum();
             int totalBudget = (int)vwMonthlyTransaction.Select(x => x.Postage).Sum();
             int countMonthDone = vwMonthlyTransaction.GroupBy(x => x.Month).Select(x => x.Key).Count();
 
