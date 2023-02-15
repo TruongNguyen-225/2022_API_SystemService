@@ -6,6 +6,7 @@ using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPI.Bo
 {
@@ -58,7 +59,7 @@ namespace SystemServiceAPI.Bo
             var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
             var tblRetail = GetQueryable<Retail>();
 
-            var vwPieChart = from x in vwMonthlyTransaction
+            var queryable = from x in vwMonthlyTransaction
                              from r in tblRetail.Where(r => r.RetailID == x.RetailID).DefaultIfEmpty()
                              group x by new
                              {
@@ -71,25 +72,57 @@ namespace SystemServiceAPI.Bo
                              {
                                  RetailID = gcs.Key.RetailID,
                                  RetailName = gcs.Key.RetailName,
-                                 Money = vwMonthlyTransaction.Select(x => x.Money).Sum(),
-                                 Postage = vwMonthlyTransaction.Select(x => x.Postage).Sum(),
-                                 Total = vwMonthlyTransaction.Select(x => x.Total).Sum(),
+                                 Money = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Money).Sum(),
+                                 Postage = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Postage).Sum(),
+                                 Total = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Total).Sum(),
                                  Month = gcs.Key.Month,
                                  Year = gcs.Key.Year,
                                  Time = gcs.Key.Month > 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
                              };
 
-            return await Task.FromResult(vwPieChart);
+            if (queryable.Any())
+            {
+                return await Task.FromResult(queryable.ToList());
+            }
+
+            return await Task.FromResult(default(object));
         }
 
         public async Task<object> GetBarChart(int take, int? month, int? year)
         {
-            var vwMonthlyTransaction = billBo.GetQueryableViewMonthlyTransaction(month, year);
-            var tblRetail = GetQueryable<Retail>();
-            var vwPieChart = GetPieChart(month, year);
-            //TODO
+            var bankQueryable = GetQueryable<Bank>();
+            var retailQueryable = GetQueryable<Retail>();
+            var serviceQueryable = GetQueryable<Service>();
+            var customerQueryable = GetQueryable<Customer>();
+            var customerRepository = GetRepository<Customer>();
+            var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
 
-            return await Task.FromResult(default(object));
+            var data = (from transaction in monthlyTransactionQueryable
+                             from customer in customerQueryable.Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
+                             from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
+                             from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
+                             from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
+                             where customer.IsDelete == false && transaction.DateTimeAdd.Year >= DateTime.Now.Year
+                             group transaction by new
+                             {
+                                 transaction.DateTimeAdd.Month,
+                                 transaction.DateTimeAdd.Year,
+                             } into gcs
+                             select new
+                             {
+                                 STT = 1,
+                                 Money = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => x.Money).Sum(),
+                                 Postage = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => x.Postage).Sum(),
+                                 Total = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => x.Total).Sum(),
+                                 Month = gcs.Key.Month,
+                                 Year = gcs.Key.Year,
+                                 Time = gcs.Key.Month > 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
+                             })
+                             .OrderByDescending(x => x.Year)
+                             .OrderByDescending(x => x.Month)
+                             .Take(take).ToList();
+
+            return await Task.FromResult(data);
         }
 
         //public async Task<object> GetPieChartService(int month)

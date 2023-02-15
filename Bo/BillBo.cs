@@ -47,38 +47,43 @@ namespace SystemServiceAPI.Bo
             int currentMonth = DateTime.Now.Month;
             int currentYear = DateTime.Now.Year;
 
-            var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
-            //var monthlyTransactionCurrentMonth = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year);
+            var customerQueryable = GetQueryable<Customer>();
+            var bankQueryable = GetQueryable<Bank>();
+            var retailQueryable = GetQueryable<Retail>();
+            var serviceQueryable = GetQueryable<Service>();
+            var customerRepository = GetRepository<Customer>();
 
-            var viewMonthlyTransactionQueryable = (from transaction in monthlyTransactionQueryable
-                                                   from customer in viewCustomerQueryable.
-                                                   Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
-                                                   where transaction.DateTimeAdd.Month == (month.HasValue ? month : currentMonth)
-                                                   && transaction.DateTimeAdd.Year == (year.HasValue ? year : currentYear)
-                                                   //orderby transaction.ID descending
-                                                   select new MonthlyTransactionResponse
-                                                   {
-                                                       STT = 1,
-                                                       ID = transaction.ID,
-                                                       ServiceID = customer.ServiceID,
-                                                       ServiceName = customer.ServiceName,
-                                                       CustomerID = customer.CustomerID,
-                                                       FullName = customer.FullName,
-                                                       Code = customer.Code,
-                                                       RetailID = customer.RetailID,
-                                                       RetailName = customer.RetailName,
-                                                       BankID = customer.BankID,
-                                                       BankName = customer.BankName,
-                                                       Money = transaction.Money,
-                                                       Postage = transaction.Postage,
-                                                       Total = transaction.Total,
-                                                       Month = transaction.DateTimeAdd.Month,
-                                                       Year = transaction.DateTimeAdd.Year,
-                                                       DateTimeAdd = transaction.DateTimeAdd
-                                                   });
+            var queryable = (from transaction in monthlyTransactionQueryable
+                             from customer in customerQueryable.Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
+                             from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
+                             from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
+                             from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
+                             where customer.IsDelete == false &&
+                                    transaction.DateTimeAdd.Month == (month.HasValue ? month : currentMonth) &&
+                                    transaction.DateTimeAdd.Year == (year.HasValue ? year : currentYear)
+                             select new MonthlyTransactionResponse
+                             {
+                                 STT = 1,
+                                 ID = transaction.ID,
+                                 ServiceID = service.ServiceID,
+                                 ServiceName = service.ServiceName,
+                                 BankID = bank.BankID,
+                                 BankName = bank.ShortName,
+                                 CustomerID = customer.CustomerID,
+                                 RetailID = retail.RetailID,
+                                 RetailName = retail.RetailName,
+                                 FullName = customer.FullName,
+                                 Code = customer.Code,
+                                 Money = transaction.Money,
+                                 Postage = transaction.Postage,
+                                 Total = transaction.Total,
+                                 Month = transaction.DateTimeAdd.Month,
+                                 Year = transaction.DateTimeAdd.Year,
+                                 DateTimeAdd = transaction.DateTimeAdd
+                             });
 
-            return viewMonthlyTransactionQueryable;
+            return queryable;
         }
 
         /// <summary>
