@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.Report;
@@ -74,7 +76,7 @@ namespace SystemServiceAPI.Bo
             var y = viewMonthlyTransactionQueryable.Where(z => z.ServiceID == 5).ToList();
             if (viewMonthlyTransactionQueryable.Any())
             {
-                return await Task.FromResult(viewMonthlyTransactionQueryable.ToList());
+                return await Task.FromResult(viewMonthlyTransactionQueryable.OrderByDescending(x => x.ServiceID).ToList());
             }
 
             return await Task.FromResult(new List<MonthlyTransactionResponse>());
@@ -109,8 +111,7 @@ namespace SystemServiceAPI.Bo
             var tblRetail = GetQueryable<Retail>();
             string retailName = tblRetail.Where(x => x.RetailID == retailID).Select(x => x.RetailName).FirstOrDefault();
 
-            //string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport.xlsx";
-            string pathTemplate = @"C:\PROJECT\SS\TemplateExportDataReport.xlsx";
+            string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateExportDataReport_V1.xlsx";
 
             FileNameParams fileNameParams = new FileNameParams
             {
@@ -133,50 +134,16 @@ namespace SystemServiceAPI.Bo
                 cellParam = cellParams
             };
 
-            byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, false);
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-            return excel;
-        }
-
-        public byte[] TestExport()
-        {
-            //DateTime? fromDate = new DateTime(2022, 12, 01);
-            //DateTime? toDate = DateTime.Now;
-
-            //List<vw_MonthlyTransaction> data = _dbContext.vw_MonthlyTransactions.Where(
-            //x => x.RetailID == 2 &&
-            //            x.DateTimeAdd.Date >= fromDate &&
-            //            x.DateTimeAdd.Date <= toDate
-            //        ).OrderBy(x => x.ServiceID).OrderBy(x => x.DateTimeAdd).ToList();
-
-
-            //DataTable dataTable = Utility.ToDataTable(data);
-
-            //FileNameParams fileNameParams = new FileNameParams
-            //{
-            //    FileName = String.Format(ExportExcelConstants.FILE_NAME_TRANSACTION_FILE_NAME, "Cafe Nhớ", fromDate.ConvertDateTimeToString103(), toDate.ConvertDateTimeToString103()),
-            //    FromDate = fromDate.ConvertDateTimeToString103(),
-            //    ToDate = toDate.ConvertDateTimeToString103(),
-            //    TimeExport = toDate.Value,
-            //};
-
-            //CellParams cellParams = new CellParams
-            //{
-            //    MaxColumn = 9,
-            //    StartColumn = 1,
-            //    StartRow = 7,
-            //};
-
-            //ExcelParamDefault excelParamDefault = new ExcelParamDefault
-            //{
-            //    fileNameParam = fileNameParams,
-            //    cellParam = cellParams
-            //};
-
-            //string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateExportMonthlyReport.xlsx";
-            //byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault);
-
-            return null;
+            using (HttpClient wc = new HttpClient(clientHandler))
+            {
+                Stream stream = await wc.GetStreamAsync(pathTemplate);
+                byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(stream, dataTable, excelParamDefault, false);
+                
+                return excel;
+            }
         }
     }
 }

@@ -42,6 +42,34 @@ namespace SystemServiceAPICore3.Utilities
             return null;
         }
 
+        public static byte[] LoadFileTemplate(Stream stream, System.Data.DataTable dataTable, ExcelParamDefault paramDefault, bool isMultiSheet = false)
+        {
+            try
+            {
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                using (ExcelPackage excelPackage = new ExcelPackage(stream))
+                {
+                    if (isMultiSheet == false)
+                    {
+                        dataTable.BindingDataFirtSheet(excelPackage, paramDefault);
+                    }
+                    else
+                    {
+                        dataTable.BindingDataMultiSheet(excelPackage, paramDefault);
+                    }
+
+                    //Save your file
+                    return excelPackage.GetAsByteArray();
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+
         /// <summary>
         /// Tính tiền thanh toán.
         /// </summary>

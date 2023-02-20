@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -413,7 +414,7 @@ namespace SystemServiceAPI.Bo
             return excel;
         }
 
-        public byte[] PrintBillElectricInit(string pathTemplate)
+        public async Task<byte[]> PrintBillElectricInit()
         {
             var tblCustomer = GetQueryable<Customer>();
             var tblBillTemp = GetQueryable<MonthlyTransactionTemp>();
@@ -431,7 +432,7 @@ namespace SystemServiceAPI.Bo
                                     && temp.DateTimeAdd.Year == year
                                     && temp.ServiceID == serviceID
                                     && temp.Status != 2  //2 : printed
-                                orderby temp.RetailID
+                                orderby temp.RetailID descending
                                 select new
                                 {
                                     ID = temp.ID,
@@ -469,39 +470,38 @@ namespace SystemServiceAPI.Bo
                 cellParam = cellParams
             };
 
-            if (String.IsNullOrEmpty(pathTemplate))
+            string pathTemplate = @"https://pss.itdvgroup.com/template/TemplateElectricBill_Retail1.xlsx";
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            using (HttpClient wc = new HttpClient(clientHandler))
             {
-                //pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill_Retail1.xlsx";
-                pathTemplate = @"C:\Users\TruongNV75\Documents\FPT\test.xlsx";
+                Stream stream = await wc.GetStreamAsync(pathTemplate);
+                byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(stream, dataTable, excelParamDefault, true);
+
+                //update bill printed
+                var listID = new List<int>();
+                var tblTempRepo = GetRepository<MonthlyTransactionTemp>();
+                foreach (var item in listBillTemp)
+                {
+                    listID.Add(item.ID);
+                }
+
+                var dataPrinted = (from temp in tblBillTemp
+                                   where listID.Contains(temp.ID)
+                                   select temp).ToList();
+
+                foreach (var data in dataPrinted)
+                {
+                    data.Status = 2;
+                    tblTempRepo.Update(data);
+                }
+
+                tblTempRepo.Save();
+
+                //return byte[] response.
+                return excel;
             }
-
-            //string pathTemplate = @"/Volumes/Data/6.Office/1.Excel/1.ExcelTemplate/TemplateElectricBill.xlsx";
-            //string pathTemplate = @"https://latex.itdvgroup.com/Report/Template/initBillTemplate.xlsx";
-            byte[] excel = ExportExcelWithEpplusHelper.LoadFileTemplate(pathTemplate, dataTable, excelParamDefault, true);
-
-            //update bill printed
-            var listID = new List<int>();
-            var tblTempRepo = GetRepository<MonthlyTransactionTemp>();
-            foreach (var item in listBillTemp)
-            {
-                listID.Add(item.ID);
-            }
-
-            var dataPrinted = (from temp in tblBillTemp
-                               where listID.Contains(temp.ID)
-                               select temp).ToList();
-
-            foreach (var data in dataPrinted)
-            {
-                data.Status = 2;
-                tblTempRepo.Update(data);
-            }
-
-            tblTempRepo.Save();
-
-            //return byte[] response.
-            return excel;
         }
-
     }
 }

@@ -12,7 +12,5 @@ namespace SystemServiceAPI.Bo.Interface
         Task<object> HistoryReport();
 
         Task<byte[]> ExportAsync(ReportRequestDto req);
-
-        byte[] TestExport();
     }
 }

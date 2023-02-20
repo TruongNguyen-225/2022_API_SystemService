@@ -24,7 +24,7 @@ namespace SystemServiceAPI.Bo.Interface
 
         byte[] PrintMultiRow(BillPrintTransactionsDto req);
 
-        byte[] PrintBillElectricInit(string template);
+        Task<byte[]> PrintBillElectricInit();
 
         Task<Dictionary<string, int>> GetTotalBillElectric(List<string> code);
     }

@@ -34,36 +34,22 @@ namespace SystemServiceAPI.Controllers
         /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost]
         [Route("Export")]
-        public async Task<FileResult> Export()
+        public async Task<FileResult> Export([FromBody] ReportRequestDto req)
         {
-            DateTime startDate = new DateTime(2023, 02, 01);
-            DateTime endDate = new DateTime(2023, 02, 28);
+            //DateTime startDate = new DateTime(2023, 02, 01);
+            //DateTime endDate = new DateTime(2023, 02, 28);
 
-            ReportRequestDto req = new ReportRequestDto
-            {
-                ServiceID = 100,
-                RetailID = 2,
-                StartTime = startDate,
-                EndTime = endDate
-            };
+            //ReportRequestDto req = new ReportRequestDto
+            //{
+            //    ServiceID = 100,
+            //    RetailID = 2,
+            //    StartTime = startDate,
+            //    EndTime = endDate
+            //};
 
             byte[] res = await _reportBo.ExportAsync(req);
-            if (res != null)
-            {
-                return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
-            }
-
-            return null;
-        }
-
-        [HttpGet]
-        [Route("TestExport")]
-        public FileResult TestExport()
-        {
-            byte[] res = _reportBo.TestExport();
-
             if (res != null)
             {
                 return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");

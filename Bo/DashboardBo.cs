@@ -6,7 +6,6 @@ using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
-using SystemServiceAPICore3.Dto.Other;
 
 namespace SystemServiceAPI.Bo
 {

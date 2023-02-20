@@ -209,13 +209,17 @@ namespace SystemServiceAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// In tất cả danh sách khách hàng tiền điện đầu tháng
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        [Route("PrintBillElectricInit/{url}")]
-        public async Task<object> PrintBillElectricInit(string urlTemplate)
+        [Route("PrintBillElectricInit")]
+        public async Task<object> PrintBillElectricInit()
         {
             try
             {
-                var result = billTempBo.PrintBillElectricInit(urlTemplate);
+                var result = await billTempBo.PrintBillElectricInit();
 
                 if (result != null)
                 {
