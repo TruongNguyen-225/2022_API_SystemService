@@ -3,11 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SystemServiceAPICore3.Utilities
 {
@@ -67,6 +65,7 @@ namespace SystemServiceAPICore3.Utilities
                 using (var decryptor = aesAlg.CreateDecryptor(key, iv))
                 {
                     string result;
+
                     using (var msDecrypt = new MemoryStream(cipher))
                     {
                         using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
@@ -85,36 +84,41 @@ namespace SystemServiceAPICore3.Utilities
 
         public static string DataTableToJSONWithStringBuilder(DataTable table)
         {
-            var JSONString = new StringBuilder();
+            var stringBuilder = new StringBuilder();
+
             if (table.Rows.Count > 0)
             {
-                JSONString.Append("[");
+                stringBuilder.Append("[");
+
                 for (int i = 0; i < table.Rows.Count; i++)
                 {
-                    JSONString.Append("{");
+                    stringBuilder.Append("{");
+
                     for (int j = 0; j < table.Columns.Count; j++)
                     {
                         if (j < table.Columns.Count - 1)
                         {
-                            JSONString.Append("\"" + table.Columns[j].ColumnName.ToString() + "\":" + "\"" + table.Rows[i][j].ToString() + "\",");
+                            stringBuilder.Append("\"" + table.Columns[j].ColumnName.ToString() + "\":" + "\"" + table.Rows[i][j].ToString() + "\",");
                         }
                         else if (j == table.Columns.Count - 1)
                         {
-                            JSONString.Append("\"" + table.Columns[j].ColumnName.ToString() + "\":" + "\"" + table.Rows[i][j].ToString() + "\"");
+                            stringBuilder.Append("\"" + table.Columns[j].ColumnName.ToString() + "\":" + "\"" + table.Rows[i][j].ToString() + "\"");
                         }
                     }
                     if (i == table.Rows.Count - 1)
                     {
-                        JSONString.Append("}");
+                        stringBuilder.Append("}");
                     }
                     else
                     {
-                        JSONString.Append("},");
+                        stringBuilder.Append("},");
                     }
                 }
-                JSONString.Append("]");
+
+                stringBuilder.Append("]");
             }
-            return JSONString.ToString();
+
+            return stringBuilder.ToString();
         }
 
         public static DataTable ToDataTable<T>(List<T> items)
@@ -137,6 +141,7 @@ namespace SystemServiceAPICore3.Utilities
                 }
                 dataTable.Rows.Add(values);
             }
+
             //put a breakpoint here and check datatable
             return dataTable;
         }

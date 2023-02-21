@@ -190,7 +190,7 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("PrintTransactions")]
-        public async Task<object> PrintTransactionsAsync(BillPrintTransactionsDto request)
+        public object PrintTransactionsAsync(BillPrintTransactionsDto request)
         {
             try
             {

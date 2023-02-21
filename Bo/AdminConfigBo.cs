@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Data;
-using System.Net;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Context;
-using SystemServiceAPI.Dto.BaseResult;
 using SystemServiceAPI.Helpers;
 using SystemServiceAPICore3.Utilities;
 
@@ -15,128 +10,48 @@ namespace SystemServiceAPI.Bo
     public class AdminConfigBo : IAdminConfig
     {
         private readonly IConfiguration _configuration;
-        private readonly AppDbContext _context;
-        public AdminConfigBo(IConfiguration configuration, AppDbContext context)
+        private string connectionString;
+        public AdminConfigBo(IConfiguration configuration)
         {
             _configuration = configuration;
-            _context = context;
+            connectionString = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
         }
 
-        public async Task<object> GetAllTable()
+        public object GetAllTable()
         {
-            string connectStr = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
-            ResponseResults response = new ResponseResults();
-            List<object> results = new List<object>();
+            string cmd = @"select schema_name(t.schema_id) as schema_name, t.name as table_name, t.create_date, t.modify_date from sys.tables t order by schema_name, table_name;";
 
-            try
+            return ExcuteQuery(cmd);
+        }
+
+        public object GetColumns(string tableName)
+        {
+            string cmd = @"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'" + tableName + "'";
+
+            return ExcuteQuery(cmd);
+        }
+
+        public object ExcuteQuery(string query)
+        {
+            if (query.ToLower().Contains("select"))
             {
-                DataTable data = new DataTable();
-                string cmd = @"select schema_name(t.schema_id) as schema_name,
-                                                            t.name as table_name,
-                                                            t.create_date,
-                                                            t.modify_date
-                                                    from sys.tables t
-                                                    order by schema_name, table_name;";
+                DataTable data = SqlHelper.GetDataReturnDataTable(connectionString, query);
 
-                data = SqlHelper.GetDataReturnDataTable(connectStr, cmd);
                 if (data != null && data.Rows != null && data.Rows.Count > 0)
                 {
-                    response.Result = Utility.DataTableToJSONWithStringBuilder(data);
-                }
-                else
-                {
-                    response.Result = null;
+                    var result = Utility.DataTableToJSONWithStringBuilder(data);
+
+                    return result;
                 }
 
-                response.Code = (int)HttpStatusCode.OK;
-                response.Msg = "SUCCESS";
+                return null;
             }
-            catch
+            else
             {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Msg = "ERROR";
-                throw;
+                bool result = SqlHelper.ExcuteNonQuerySQL(query, connectionString);
+
+                return result;
             }
-
-            return await Task.FromResult(response);
-        }
-
-        public async Task<object> GetColumns(string tableName)
-        {
-            string connectStr = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
-            ResponseResults response = new ResponseResults();
-            List<object> results = new List<object>();
-
-            try
-            {
-                DataTable data = new DataTable();
-                string cmd = @"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'" + tableName + "'";
-
-                data = SqlHelper.GetDataReturnDataTable(connectStr, cmd);
-                if (data != null && data.Rows != null && data.Rows.Count > 0)
-                {
-                    response.Result = Utility.DataTableToJSONWithStringBuilder(data);
-                }
-                else
-                {
-                    response.Result = null;
-                }
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Msg = "SUCCESS";
-            }
-            catch
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Msg = "ERROR";
-                throw;
-            }
-
-            return await Task.FromResult(response);
-        }
-
-        public async Task<object> ExcuteQuery(string query)
-        {
-            string key = _configuration.GetValue<String>("Encrypt:Key");
-            //string query = Utility.DecryptString(cmd, key);
-            string connectStr = _configuration.GetValue<String>("ConnectionStrings:DefaultConnection");
-            ResponseResults response = new ResponseResults();
-            List<object> results = new List<object>();
-
-            try
-            {
-                if (query.ToLower().Contains("select"))
-                {
-                    DataTable data = new DataTable();
-                    data = SqlHelper.GetDataReturnDataTable(connectStr, query);
-                    if (data != null && data.Rows != null && data.Rows.Count > 0)
-                    {
-                        response.Result = Utility.DataTableToJSONWithStringBuilder(data);
-                    }
-                    else
-                    {
-                        response.Result = null;
-                    }
-                }
-                else
-                {
-                    bool result = SqlHelper.ExcuteNonQuerySQL(query, connectStr);
-                    response.Result = result;
-                }
-
-                response.Code = (int)HttpStatusCode.OK;
-                response.Msg = "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                response.Code = (int)HttpStatusCode.InternalServerError;
-                response.Msg = "ERROR:\n" + ex.Message;
-                response.Result = null;
-
-                throw;
-            }
-
-            return await Task.FromResult(response);
         }
     }
 }

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Dto.BillDto;
 using SystemServiceAPICore3.Dto.AdminConfigDto;
+using SystemServiceAPICore3.Utilities.Constants;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,23 +21,74 @@ namespace SystemServiceAPI.Controllers
 
         [HttpGet]
         [Route("GetAllTable")]
-        public async Task<object> GetAllTable()
+        public object GetAllTable()
         {
-            return await _adminConfig.GetAllTable();
+            try
+            {
+                var result = _adminConfig.GetAllTable();
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         [HttpGet]
         [Route("GetColumns/{tableName}")]
-        public async Task<object> GetColumns(string tableName)
+        public object GetColumns(string tableName)
         {
-            return await _adminConfig.GetColumns(tableName);
+            try
+            {
+                if (!string.IsNullOrEmpty(tableName))
+                {
+                    var result = _adminConfig.GetColumns(tableName);
+
+                    return Ok(new
+                    {
+                        Result = result,
+                        Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                    });
+                }
+
+                return BadRequest();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         [HttpPost]
         [Route("ExcuteQuery")]
-        public async Task<object> ExcuteQuery([FromBody] AdminConfigDto req)
+        public object ExcuteQuery([FromBody] AdminConfigDto req)
         {
-            return await _adminConfig.ExcuteQuery(req.query);
+            try
+            {
+                string query = req.query;
+
+                if (!string.IsNullOrEmpty(query))
+                {
+                    var result = _adminConfig.ExcuteQuery(req.query);
+
+                    return Ok(new
+                    {
+                        Result = result,
+                        Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                    });
+                }
+                
+                return BadRequest();
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

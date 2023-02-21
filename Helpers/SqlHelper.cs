@@ -8,7 +8,7 @@ namespace SystemServiceAPI.Helpers
 {
     public class SqlHelper
     {
-        public static DataSet GetDataReturnDbSet(List<string> selectCommand, string connectString)
+        public static DataSet GetDataReturnDbSet(string connectString, List<string> selectCommand)
         {
             DataSet data = new DataSet();
 
@@ -63,6 +63,7 @@ namespace SystemServiceAPI.Helpers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
 
@@ -98,7 +99,7 @@ namespace SystemServiceAPI.Helpers
         /// </summary>
         /// <param name="query">query</param>
         /// <returns>bool</returns>
-        public static bool ExcuteNonQuerySQL(string query, string connectString)
+        public static bool ExcuteNonQuerySQL(string connectString, string query)
         {
             bool isSuccess = false;
 

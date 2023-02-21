@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Dto.Report;
+using SystemServiceAPICore3.Utilities.Constants;
 
 namespace SystemServiceAPI.Controllers
 {
@@ -24,9 +24,22 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("GetByCondition")]
-        public async Task<object> GetByCondition(ReportRequestDto req)
+        public object GetByCondition(ReportRequestDto req)
         {
-            return await _reportBo.GetByCondition(req);
+            try
+            {
+                var result = _reportBo.GetByCondition(req);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -36,26 +49,23 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Export")]
-        public async Task<FileResult> Export([FromBody] ReportRequestDto req)
+        public async Task<object> Export([FromBody] ReportRequestDto req)
         {
-            //DateTime startDate = new DateTime(2023, 02, 01);
-            //DateTime endDate = new DateTime(2023, 02, 28);
-
-            //ReportRequestDto req = new ReportRequestDto
-            //{
-            //    ServiceID = 100,
-            //    RetailID = 2,
-            //    StartTime = startDate,
-            //    EndTime = endDate
-            //};
-
-            byte[] res = await _reportBo.ExportAsync(req);
-            if (res != null)
+            try
             {
-                return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
-            }
+                byte[] res = await _reportBo.ExportAsync(req);
 
-            return null;
+                if (res != null)
+                {
+                    return File(res.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Grid.xlsx");
+                }
+
+                return NotFound();
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }
