@@ -24,11 +24,11 @@ namespace SystemServiceAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("GetByCondition")]
-        public object GetByCondition(ReportRequestDto req)
+        public async Task<object> GetByCondition(ReportRequestDto req)
         {
             try
             {
-                var result = _reportBo.GetByCondition(req);
+                var result = await _reportBo.GetByCondition(req);
 
                 return Ok(new
                 {

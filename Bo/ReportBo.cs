@@ -29,10 +29,10 @@ namespace SystemServiceAPI.Bo
 
         public async Task<List<MonthlyTransactionResponse>> GetByCondition(ReportRequestDto req)
         {
-            var startDate = req.StartTime;
+            var startDate = new DateTime(req.StartTime.Year, req.StartTime.Month, req.StartTime.Day);
+            var endDate = new DateTime(req.EndTime.Year, req.EndTime.Month, req.EndTime.Day).AddDays(1).AddSeconds(-1);
             var serviceID = req.ServiceID;
             var retailID = req.RetailID;
-            var endDate = req.EndTime;
 
             //var viewCustomerQueryable = customerBo.GetQueryableViewCustomer();
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
@@ -46,12 +46,10 @@ namespace SystemServiceAPI.Bo
                                                    from retail in retailQueryable.Where(x => x.RetailID == transaction.RetailID).DefaultIfEmpty()
                                                    from service in serviceQueryable.Where(x => x.ServiceID == transaction.ServiceID).DefaultIfEmpty()
                                                    from bank in bankQueryable.Where(x => x.BankID == transaction.BankID).DefaultIfEmpty()
-                                                   where transaction.RetailID == req.RetailID
+                                                   where transaction.RetailID == retailID
                                                    && transaction.DateTimeAdd.Date >= startDate
                                                    && transaction.DateTimeAdd.Date <= endDate
-                                                   && serviceID > 6 ? true : transaction.ServiceID == serviceID
-                                                   orderby transaction.ServiceID descending
-                                                   orderby transaction.DateTimeAdd ascending
+                                                   && (serviceID > 6 ? true : transaction.ServiceID == serviceID)
                                                    select new MonthlyTransactionResponse
                                                    {
                                                        STT = 1,
@@ -73,10 +71,9 @@ namespace SystemServiceAPI.Bo
                                                        DateTimeAdd = transaction.DateTimeAdd
                                                    });
 
-            var y = viewMonthlyTransactionQueryable.Where(z => z.ServiceID == 5).ToList();
             if (viewMonthlyTransactionQueryable.Any())
             {
-                return await Task.FromResult(viewMonthlyTransactionQueryable.OrderByDescending(x => x.ServiceID).ToList());
+                return await Task.FromResult(viewMonthlyTransactionQueryable.OrderByDescending(x => x.ServiceID).OrderByDescending(x => x.DateTimeAdd).ToList());
             }
 
             return await Task.FromResult(new List<MonthlyTransactionResponse>());
