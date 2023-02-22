@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SystemServiceAPI.Dto.CustomerID
+namespace SystemServiceAPI.Dto.CustomerDto
 {
     public class CustomerRequestDto
     {

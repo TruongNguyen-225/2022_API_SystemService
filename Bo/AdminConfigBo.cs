@@ -1,6 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Data;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Helpers;
 using SystemServiceAPICore3.Utilities;
@@ -51,6 +56,31 @@ namespace SystemServiceAPI.Bo
                 bool result = SqlHelper.ExcuteNonQuerySQL(query, connectionString);
 
                 return result;
+            }
+        }
+
+        public async Task<object> UploadFile(IFormFile file)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (var ms = new MemoryStream())
+                {
+                    file.CopyTo(ms);
+                    var bytes = ms.ToArray();
+
+                    using (var content = new ByteArrayContent(bytes))
+                    {
+                        content.Headers.ContentType = new MediaTypeHeaderValue("*/*");
+
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), "FileDownloaded",  file.FileName);
+                        //Send it
+                        var response = await client.PostAsync(path, content);
+                        response.EnsureSuccessStatusCode();
+                        Stream responseStream = await response.Content.ReadAsStreamAsync();
+                        StreamReader reader = new StreamReader(responseStream);
+                        return reader.ReadToEnd();
+                    }
+                }
             }
         }
     }

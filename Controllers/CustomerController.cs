@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
-using SystemServiceAPI.Dto.CustomerID;
+using SystemServiceAPI.Dto.CustomerDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Controllers;
 using SystemServiceAPICore3.Dto;

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using SystemServiceAPI.Dto;
 using SystemServiceAPI.Dto.BillDto;
-using SystemServiceAPI.Dto.CustomerID;
+using SystemServiceAPI.Dto.CustomerDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Dto;
 using SystemServiceAPICore3.Dto.Other;

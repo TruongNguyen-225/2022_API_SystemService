@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPICore3.Dto.AdminConfigDto;
 using SystemServiceAPICore3.Utilities.Constants;
@@ -83,6 +85,27 @@ namespace SystemServiceAPI.Controllers
                     });
                 }
                 
+                return BadRequest();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UploadFileTemplate")]
+        public async Task<object> UploadFileTemplate(IFormFile file)
+        {
+            try
+            {
+                if (file != null && file.Length > 0)
+                {
+                    var x = await _adminConfig.UploadFile(file);
+
+                    return x;
+                }
+
                 return BadRequest();
             }
             catch

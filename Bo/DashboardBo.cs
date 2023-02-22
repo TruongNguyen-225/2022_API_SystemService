@@ -6,6 +6,7 @@ using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Bo;
 using SystemServiceAPICore3.Dto;
+using SystemServiceAPICore3.Dto.DashboardDto;
 
 namespace SystemServiceAPI.Bo
 {
@@ -59,25 +60,25 @@ namespace SystemServiceAPI.Bo
             var tblRetail = GetQueryable<Retail>();
 
             var queryable = from x in vwMonthlyTransaction
-                             from r in tblRetail.Where(r => r.RetailID == x.RetailID).DefaultIfEmpty()
-                             group x by new
-                             {
-                                 x.RetailID,
-                                 x.RetailName,
-                                 x.Month,
-                                 x.Year
-                             } into gcs
-                             select new
-                             {
-                                 RetailID = gcs.Key.RetailID,
-                                 RetailName = gcs.Key.RetailName,
-                                 Money = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Money).Sum(),
-                                 Postage = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Postage).Sum(),
-                                 Total = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Total).Sum(),
-                                 Month = gcs.Key.Month,
-                                 Year = gcs.Key.Year,
-                                 Time = gcs.Key.Month > 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
-                             };
+                            from r in tblRetail.Where(r => r.RetailID == x.RetailID).DefaultIfEmpty()
+                            group x by new
+                            {
+                                x.RetailID,
+                                x.RetailName,
+                                x.Month,
+                                x.Year
+                            } into gcs
+                            select new
+                            {
+                                RetailID = gcs.Key.RetailID,
+                                RetailName = gcs.Key.RetailName,
+                                Money = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Money).Sum(),
+                                Postage = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Postage).Sum(),
+                                Total = vwMonthlyTransaction.Where(x => x.RetailID == gcs.Key.RetailID).Select(x => x.Total).Sum(),
+                                Month = gcs.Key.Month,
+                                Year = gcs.Key.Year,
+                                Time = gcs.Key.Month > 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
+                            };
 
             if (queryable.Any())
             {
@@ -97,29 +98,29 @@ namespace SystemServiceAPI.Bo
             var monthlyTransactionQueryable = GetQueryable<MonthlyTransaction>();
 
             var data = (from transaction in monthlyTransactionQueryable
-                             from customer in customerQueryable.Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
-                             from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
-                             from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
-                             from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
-                             where customer.IsDelete == false && transaction.DateTimeAdd.Year >= DateTime.Now.Year
-                             group transaction by new
-                             {
-                                 transaction.DateTimeAdd.Month,
-                                 transaction.DateTimeAdd.Year,
-                             } into gcs
-                             select new
-                             {
-                                 STT = 1,
-                                 Money = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => x.Money).Sum(),
-                                 Postage = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => x.Postage).Sum(),
-                                 Total = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => x.Total).Sum(),
-                                 Month = gcs.Key.Month,
-                                 Year = gcs.Key.Year,
-                                 Time = gcs.Key.Month > 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
-                             })
-                             .OrderByDescending(x => x.Year)
-                             .OrderByDescending(x => x.Month)
-                             .Take(take).ToList();
+                        from customer in customerQueryable.Where(x => x.CustomerID == transaction.CustomerID).DefaultIfEmpty()
+                        from retail in retailQueryable.Where(x => x.RetailID == customer.RetailID).DefaultIfEmpty()
+                        from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
+                        from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
+                        where customer.IsDelete == false && transaction.DateTimeAdd.Year >= DateTime.Now.Year - 1
+                        group transaction by new
+                        {
+                            transaction.DateTimeAdd.Month,
+                            transaction.DateTimeAdd.Year,
+                        } into gcs
+                        select new DashboardDto
+                        {
+                            STT = 1,
+                            Money = monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => (long)x.Money).Sum(),
+                            Postage = (long)monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => (long)x.Postage).Sum(),
+                            Total = (long)monthlyTransactionQueryable.Where(x => x.DateTimeAdd.Month == gcs.Key.Month).Select(x => (long)x.Total).Sum(),
+                            Month = gcs.Key.Month,
+                            Year = gcs.Key.Year,
+                            Time = gcs.Key.Month >= 10 ? gcs.Key.Month.ToString() + "/" + gcs.Key.Year : "0" + gcs.Key.Month.ToString() + "/" + gcs.Key.Year
+                        })
+                        .OrderBy(x => x.Time)
+                        .Take(take)
+                        .ToList();
 
             return await Task.FromResult(data);
         }

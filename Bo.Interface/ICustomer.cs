@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using SystemServiceAPI.Dto.CustomerID;
+using SystemServiceAPI.Dto.CustomerDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Dto.Other;
 
