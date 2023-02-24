@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
 using SystemServiceAPICore3.Dto.AdminConfigDto;
@@ -84,7 +85,7 @@ namespace SystemServiceAPI.Controllers
                         Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
                     });
                 }
-                
+
                 return BadRequest();
             }
             catch
@@ -107,6 +108,21 @@ namespace SystemServiceAPI.Controllers
                 }
 
                 return BadRequest();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetPath")]
+        public async Task<object> GetPath()
+        {
+            try
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "FileDownloaded", "xxxx.xlsx");
+                return path;
             }
             catch
             {

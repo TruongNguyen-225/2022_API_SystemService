@@ -5,6 +5,7 @@ using SystemServiceAPI.Dto.CustomerDto;
 using SystemServiceAPI.Entities.Table;
 using SystemServiceAPICore3.Dto;
 using SystemServiceAPICore3.Dto.Other;
+using SystemServiceAPICore3.Entities.Table;
 
 namespace SystemServiceAPICore3.Profiles
 {
@@ -34,6 +35,22 @@ namespace SystemServiceAPICore3.Profiles
             CreateMap<BillUpdateDto, MonthlyTransaction>().ReverseMap();
             CreateMap<BillUpdateDto, MonthlyTransactionTemp>().ReverseMap();
             CreateMap<MonthlyTransactionResponse, MonthlyTransactionTemp>().ForMember(x => x.ID, opt => opt.Ignore()).ReverseMap();
+
+            //Level
+            CreateMap<Level, LevelDto>();
+            CreateMap<LevelDto, Level>();
+
+            //FileUpload
+            CreateMap<FileUpload, FileUploadDto>();
+            CreateMap<FileUploadDto, FileUpload>();
+
+            //ConfigPrice
+            CreateMap<ConfigPrice, ConfigPriceDto>();
+            CreateMap<ConfigPriceDto, ConfigPrice>();
+
+            //Screen
+            CreateMap<Screen, ScreenDto>();
+            CreateMap<ScreenDto, Screen>();
         }
     }
 }

@@ -61,27 +61,34 @@ namespace SystemServiceAPI.Bo
 
         public async Task<object> UploadFile(IFormFile file)
         {
-            using (HttpClient client = new HttpClient())
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            using var ms = new MemoryStream();
+            file.CopyTo(ms);
+            var bytes = ms.ToArray();
+
+            using var form = new MultipartFormDataContent();
+            using var fileContent = new ByteArrayContent(bytes);
+
+            string hostAddress = @"https://pss.itdvgroup.com/template";
+            string localAddress = @"https://localhost:5001";
+
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(file.ContentType);
+
+            // here it is important that second parameter matches with name given in API.
+            form.Add(content: fileContent, name: "file", fileName: file.FileName);
+
+            var httpClient = new HttpClient(clientHandler)
             {
-                using (var ms = new MemoryStream())
-                {
-                    file.CopyTo(ms);
-                    var bytes = ms.ToArray();
+                BaseAddress = new Uri(hostAddress)
+            };
 
-                    using (var content = new ByteArrayContent(bytes))
-                    {
-                        content.Headers.ContentType = new MediaTypeHeaderValue("*/*");
+            var response = await httpClient.PostAsync("", form);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-                        var path = Path.Combine(Directory.GetCurrentDirectory(), "FileDownloaded",  file.FileName);
-                        //Send it
-                        var response = await client.PostAsync(path, content);
-                        response.EnsureSuccessStatusCode();
-                        Stream responseStream = await response.Content.ReadAsStreamAsync();
-                        StreamReader reader = new StreamReader(responseStream);
-                        return reader.ReadToEnd();
-                    }
-                }
-            }
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }

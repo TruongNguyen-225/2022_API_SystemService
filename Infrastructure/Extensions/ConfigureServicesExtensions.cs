@@ -59,6 +59,7 @@ namespace SystemServiceAPICore3.Infrastructure.Extensions
             services.AddScoped<IAdminConfig, AdminConfigBo>();
             services.AddScoped<IBillTempBo, BillTempBo>();
             services.AddScoped<IAuthenticationBo, AuthenticationBo>();
+            services.AddScoped<IConfigBo, ConfigBo>();
         }
 
         private static void AddDal(this IServiceCollection services, IConfiguration configuration)
