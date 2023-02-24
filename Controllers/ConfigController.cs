@@ -293,8 +293,8 @@ namespace SystemServiceAPI.Controllers
         }
 
         [HttpPut]
-        [Route("DeleteAccount/{accountID}")]
-        public async Task<object> DeleteAccount(int accountID)
+        [Route("DeleteAccount")]
+        public async Task<object> DeleteAccount([FromBody] int accountID)
         {
             try
             {
