@@ -52,7 +52,7 @@ namespace SystemServiceAPICore3.Controllers
                     var refreshToken = tokenService.GenerateRefreshToken();
 
                     account.RefreshToken = refreshToken;
-                    account.RefreshTokenExpiryTime = DateTime.Now.AddHours(1);
+                    account.RefreshTokenExpiryTime = DateTime.Now.AddYears(1);
                     authenticationBo.UpdateRefreshToken(account);
 
                     return Ok(new
