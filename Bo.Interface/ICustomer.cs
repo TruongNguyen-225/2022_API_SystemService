@@ -18,6 +18,8 @@ namespace SystemServiceAPI.Bo.Interface
 
         Task<object> GetCustomerByServiceID(int serviceID);
 
+        Task<object> GetCustomerByCondition(int? serviceID, int ?retailID);
+
         Task<object> GetByCondition(CustomerRequestDto req);
 
         Task<bool> CheckCustomerIsExist(string code, int serviceID, int retailID);

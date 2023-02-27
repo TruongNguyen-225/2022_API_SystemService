@@ -72,7 +72,7 @@ namespace SystemServiceAPI.Bo
                                  BankName = bank.ShortName,
                                  CustomerID = customer.CustomerID,
                                  RetailID = retail.RetailID,
-                                 RetailName = retail.RetailName,
+                                 RetailName = retail.DeputizeName,
                                  FullName = customer.FullName,
                                  Code = customer.Code,
                                  Money = transaction.Money,

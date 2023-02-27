@@ -19,6 +19,8 @@ namespace SystemServiceAPICore3.Dto.Other
 
         public string RetailName { get; set; }
 
+        public string DeputizeName { get; set; }
+
         public string FullName { get; set; }
 
         public string Code { get; set; }

@@ -115,6 +115,7 @@ namespace SystemServiceAPI.Bo
                                 ID = file.ID,
                                 ScreenID = file.ScreenID,
                                 ScreenName = screen.ScreenName,
+                                Describe = screen.Describe,
                                 FileName = file.FileName,
                                 FileSize = file.FileSize,
                                 FilePath = file.FilePath,

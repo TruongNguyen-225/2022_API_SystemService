@@ -90,6 +90,48 @@ namespace SystemServiceAPI.Controllers
         }
 
         /// <summary>
+        /// Danh sách khách hàng theo điều kiện
+        /// </summary>
+        /// <param name="serviceID"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("GetCustomerByCondition")]
+        public async Task<object> GetCustomerByCondition([FromBody] CustomerRequestDto request)
+        {
+            try
+            {
+                int? serviceID = request.ServiceID;
+                int? retailID = request.RetailID;
+
+                if(serviceID.HasValue && !retailID.HasValue)
+                {
+
+                    var result = await customerBo.GetCustomerByServiceID((int)serviceID);
+
+                    return Ok(new
+                    {
+                        Result = result,
+                        Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                    });
+                }
+                else
+                {
+                    var result = await customerBo.GetCustomerByCondition(serviceID, retailID);
+
+                    return Ok(new
+                    {
+                        Result = result,
+                        Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                    });
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Get data customer by multi conditions
         /// </summary>
         /// <param name="req"></param>
@@ -178,34 +220,25 @@ namespace SystemServiceAPI.Controllers
             try
             {
                 int customerID = req.CustomerID;
-                int serviceID = req.ServiceID;
                 string code = req.Code;
                 string fullName = req.FullName;
-                int retailID = req.RetailID;
-                int? bankID = req.BankID;
 
                 if (!String.IsNullOrEmpty(code) && !String.IsNullOrEmpty(fullName))
                 {
                     Customer customer = await customerBo.GetCustomer(customerID);
+
                     if (customer != null)
                     {
-                        bool checkCustomerExisted = await customerBo.CheckCustomerIsExist(code, serviceID, retailID);
-                        if (!checkCustomerExisted)
-                        {
-                            var result = await customerBo.UpdateCustomer(customer, req);
-                            return Ok(new
-                            {
-                                Result = result,
-                                Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
-                            });
-                        }
+                        var result = await customerBo.UpdateCustomer(customer, req);
 
-                        return BadRequest(new
+                        return Ok(new
                         {
-                            Result = default(object),
-                            Messages = CustomerConstants.CUSTOMER_SERVICE_1_IS_EXISTED
+                            Result = result,
+                            Messages = result == null ? StatusConstants.UPDATE_FAIL : StatusConstants.SUCCESS
                         });
                     }
+
+                    return NotFound();
                 }
 
                 return BadRequest(new

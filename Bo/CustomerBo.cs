@@ -72,6 +72,7 @@ namespace SystemServiceAPI.Bo
                                  CustomerID = customer.CustomerID,
                                  RetailID = retail.RetailID,
                                  RetailName = retail.RetailName,
+                                 DeputizeName = retail.DeputizeName,
                                  FullName = customer.FullName,
                                  Code = customer.Code,
                                  VillageID = customer.VillageID,
@@ -155,6 +156,28 @@ namespace SystemServiceAPI.Bo
             return await Task.FromResult(default(object));
         }
 
+        public async Task<object> GetCustomerByCondition(int? serviceID, int? retailID)
+        {
+            var customerQueryable = GetQueryableViewCustomer();
+            IQueryable<CustomerResponse> result = null;
+
+            if (!serviceID.HasValue && retailID.HasValue)
+            {
+                result = customerQueryable.Where(customer => customer.RetailID == retailID.Value);
+            }
+            else
+            {
+                result = customerQueryable.Where(customer => customer.ServiceID == serviceID.Value && customer.RetailID == retailID.Value);
+            }
+
+            if (result.Any())
+            {
+                return await Task.FromResult(result.ToList());
+            }
+
+            return await Task.FromResult(default(object));
+        }
+
         /// <summary>
         /// Lấy danh sách khách hàng theo nhiều điều kiện
         /// Theo serviceID
@@ -210,18 +233,18 @@ namespace SystemServiceAPI.Bo
             var destination = mapper.Map<AddCustomerDto, CustomerDto>(req);
             var retail = retailQueryable.Where(x => x.RetailID == retailID).FirstOrDefault();
 
-            //Tiền điện
-            if (serviceID == 1)
-            {
-                code = destination.Code;
-                code = code.Substring(code.Length - 5, code.Length);
-                destination.FullName = $"{retail.RetailName} | {fullName} | {code}";
-            }
-            else
-            {
-                var bank = bankQueryable.Where(x => x.BankID == bankID.Value).FirstOrDefault();
-                destination.FullName = $"{retail.RetailName} | {fullName} | {bank.ShortName}";
-            }
+            ////Tiền điện
+            //if (serviceID == 1)
+            //{
+            //    code = destination.Code;
+            //    code = code.Substring(code.Length - 5, code.Length);
+            //    destination.FullName = $"{retail.RetailName} | {fullName} | {code}";
+            //}
+            //else
+            //{
+            //    var bank = bankQueryable.Where(x => x.BankID == bankID.Value).FirstOrDefault();
+            //    destination.FullName = $"{retail.RetailName} | {fullName} | {bank.ShortName}";
+            //}
 
             destination.DateTimeAdd = DateTime.Now;
             destination = Insert(destination);
@@ -239,13 +262,13 @@ namespace SystemServiceAPI.Bo
         public async Task<bool> CheckCustomerIsExist(string code, int serviceID, int retailID)
         {
             var customerQueryable = GetQueryableViewCustomer();
-            var customerByCode = await customerQueryable
-                    .Where(x => x.Code == code && x.RetailID == retailID && x.ServiceID == serviceID)
-                    .FirstOrDefaultAsync();
+            var customerByCode = customerQueryable
+                    .Where(x => x.Code == code && x.RetailID == retailID && x.ServiceID == serviceID).Select(x => x.Code).FirstOrDefault();
 
             if (customerByCode != null)
             {
                 return await Task.FromResult(true);
+
             }
 
             return await Task.FromResult(false);
@@ -293,18 +316,12 @@ namespace SystemServiceAPI.Bo
             customer = mapper.Map<UpdateCustomerDto, Customer>(req, customer);
             var retail = retailQueryable.Where(x => x.RetailID == retailID).FirstOrDefault();
 
-            //Tiền điện
-            if (serviceID == 1)
-            {
-                code = customer.Code;
-                code = code.Substring(code.Length - 5, code.Length);
-                customer.FullName = $"{retail.RetailName} | {fullName} | {code}";
-            }
-            else
-            {
-                var bank = bankQueryable.Where(x => x.BankID == bankID.Value).FirstOrDefault();
-                customer.FullName = $"{retail.RetailName} | {fullName} | {bank.ShortName}";
-            }
+            ////Chuyển khoản || đóng trả góp
+            //if (serviceID == 2 || serviceID == 4)
+            //{
+            //    var bank = bankQueryable.Where(x => x.BankID == bankID.Value).FirstOrDefault();
+            //    customer.FullName = $"{fullName} | {bank.ShortName}";
+            //}
 
             customer.DateTimeUpdate = DateTime.Now;
             customer = customerRepository.Update(customer, true);
@@ -325,7 +342,7 @@ namespace SystemServiceAPI.Bo
             if (customer != null)
             {
                 customer.IsDelete = true;
-                customer.DateTimeAdd = DateTime.Now;
+                customer.DateTimeUpdate = DateTime.Now;
 
                 customer = customerRepository.Update(customer, true);
                 return await Task.FromResult(customer);
