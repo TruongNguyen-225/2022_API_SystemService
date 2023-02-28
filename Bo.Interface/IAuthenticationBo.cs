@@ -8,5 +8,7 @@ namespace SystemServiceAPICore3.Bo.Interface
         Task<Account> GetUser(string username, string password);
 
         void UpdateRefreshToken(Account account);
+
+        Task<Account> GetUserByRefreshToke(string refreshToken, string username);
     }
 }

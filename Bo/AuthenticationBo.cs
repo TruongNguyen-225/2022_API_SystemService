@@ -29,5 +29,12 @@ namespace SystemServiceAPICore3.Bo
             Account entity = dbContext.Accounts.Update(account).Entity;
             dbContext.SaveChangesAsync();
         }
+
+        public async Task<Account> GetUserByRefreshToke(string refreshToken, string username)
+        {
+            Account account = dbContext.Accounts.Where(x => x.RefreshToken == refreshToken  && x.UserName ==  username).FirstOrDefault();
+
+            return await Task.FromResult(account);
+        }
     }
 }

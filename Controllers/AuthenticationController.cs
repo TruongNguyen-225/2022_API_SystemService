@@ -40,6 +40,7 @@ namespace SystemServiceAPICore3.Controllers
                         new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                        new Claim(ClaimTypes.Name, account.UserName),
                         new Claim("AccountID", account.AccountID.ToString()),
                         new Claim("UserName", account.UserName),
                         new Claim("Role", account.Role.ToString()),
@@ -59,7 +60,7 @@ namespace SystemServiceAPICore3.Controllers
                     {
                         Token = accessToken,
                         RefreshToken = refreshToken,
-                        Expried = DateTime.Now.AddHours(1)
+                        Expried = DateTime.Now.AddMinutes(1)
                     });
                 }
 
@@ -67,6 +68,48 @@ namespace SystemServiceAPICore3.Controllers
             }
 
             return BadRequest("Invalid client request");
+        }
+
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<object> RefreshToken([FromBody] RefreshTokenDto request)
+        {
+            string refreshToken = request.RefreshToken;
+            string token = request.Token;
+
+            var principal = tokenService.GetPrincipalFromExpiredToken(token);
+            if (principal == null)
+            {
+                return BadRequest("Invalid access token or refresh token");
+            }
+
+            #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            #pragma warning disable CS8602 // Dereference of a possibly null reference.
+
+            string username = principal.Identity.Name;
+
+            #pragma warning restore CS8602 // Dereference of a possibly null reference.
+            #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            var account = await authenticationBo.GetUserByRefreshToke(refreshToken, username);
+
+            if (account == null || account.RefreshToken != refreshToken || account.RefreshTokenExpiryTime <= DateTime.Now)
+            {
+                return BadRequest("Invalid access token or refresh token");
+            }
+
+            var newAccessToken = tokenService.GenerateAccessToken(principal.Claims);
+            var newRefreshToken = tokenService.GenerateRefreshToken();
+
+            account.RefreshToken = newRefreshToken;
+            authenticationBo.UpdateRefreshToken(account);
+
+            return Ok(new
+            {
+                Token = newAccessToken,
+                RefreshToken = newRefreshToken,
+                Expried = DateTime.Now.AddMinutes(1)
+            });
         }
     }
 }

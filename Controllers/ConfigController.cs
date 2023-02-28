@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace SystemServiceAPI.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class ConfigController : BaseController<ConfigPriceDto>
     {
         #region -- Variables --

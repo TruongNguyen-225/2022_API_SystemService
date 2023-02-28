@@ -22,4 +22,10 @@ namespace SystemServiceAPICore3.Dto.Other
         public string RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
     }
+
+    public class RefreshTokenDto
+    {
+        public string RefreshToken { get; set; }
+        public string Token { get; set; }
+    }
 }
