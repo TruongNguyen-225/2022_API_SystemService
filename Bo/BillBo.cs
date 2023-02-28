@@ -132,6 +132,14 @@ namespace SystemServiceAPI.Bo
             return new List<MonthlyTransactionResponse>();
         }
 
+        public async Task<object> GetElectricBillTemp(string code, int month, int year)
+        {
+            var billTempQueryable = GetQueryable<MonthlyTransactionTemp>();
+            var money = billTempQueryable.Where(x => x.Code == code && x.DateTimeAdd.Month == month && x.DateTimeAdd.Year == year).FirstOrDefault();
+
+            return await Task.FromResult(money);
+        }
+
         /// <summary>
         /// Thêm mới giao dịch
         /// </summary>

@@ -31,6 +31,8 @@ namespace SystemServiceAPI.Bo.Interface
         Task<byte[]> Print(int billID);
 
         byte[] PrintMultiRow(BillPrintTransactionsDto req);
+
+        Task<object> GetElectricBillTemp(string code, int month, int year);
     }
 }
 

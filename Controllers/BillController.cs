@@ -63,6 +63,29 @@ namespace SystemServiceAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetElectricBillTemp/{code}")]
+        public async Task<object> GetElectricBillTemp(string code)
+        {
+            try
+            {
+                int month = DateTime.Now.Month;
+                int year = DateTime.Now.Year;
+
+                var result = await billBo.GetElectricBillTemp(code, month, year);
+
+                return Ok(new
+                {
+                    Result = result,
+                    Messages = result == null ? StatusConstants.NOT_FOUND : StatusConstants.SUCCESS
+                });
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         /// <summary>
         /// Danh sách giao dịch theo điều kiện
         /// </summary>
