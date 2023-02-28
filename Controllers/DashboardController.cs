@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
@@ -11,7 +12,7 @@ namespace SystemServiceAPI.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class DashboardController : BaseController<CustomerDto>
     {
         private readonly IDashboard _dashboardBo;

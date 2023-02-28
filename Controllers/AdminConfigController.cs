@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace SystemServiceAPI.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class AdminConfigController : ControllerBase
     {
         private readonly IAdminConfig _adminConfig;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace SystemServiceAPI.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class BillController : BaseController<MonthlyTransactionDto>
     {
         #region -- Variables --

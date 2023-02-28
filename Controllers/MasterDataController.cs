@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace SystemServiceAPI.Controllers
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class MasterDataController : ControllerBase
     {
         private readonly IMasterData _masterBo;

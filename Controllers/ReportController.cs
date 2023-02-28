@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using SystemServiceAPI.Bo.Interface;
@@ -9,6 +10,7 @@ namespace SystemServiceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportController : ControllerBase
     {
         private readonly IReport _reportBo;
