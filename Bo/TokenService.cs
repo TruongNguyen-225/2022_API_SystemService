@@ -27,9 +27,10 @@ namespace SystemServiceAPICore3.Bo
                 issuer: configuration["Jwt:Issuer"],
                 audience: configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(1),
+                expires: DateTime.Now.AddHours(1),
                 signingCredentials: signinCredentials
             );
+
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
 
             return tokenString;
@@ -55,12 +56,17 @@ namespace SystemServiceAPICore3.Bo
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"])),
                 ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
             };
+
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken securityToken;
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
             var jwtSecurityToken = securityToken as JwtSecurityToken;
+
             if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("Invalid token");
+            {
+                throw new SecurityTokenException("Invalid token : " + token);
+            }
+
             return principal;
         }
 

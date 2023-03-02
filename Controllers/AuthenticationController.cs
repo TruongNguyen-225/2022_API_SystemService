@@ -95,7 +95,16 @@ namespace SystemServiceAPICore3.Controllers
 
             if (account == null || account.RefreshToken != refreshToken || account.RefreshTokenExpiryTime <= DateTime.Now)
             {
-                return BadRequest("Invalid access token or refresh token");
+                if(account == null)
+                {
+                    return BadRequest("Account is null");
+                }
+                else if(account.RefreshToken != refreshToken)
+                {
+                    return BadRequest("Invalid refresh token");
+                }
+
+                return BadRequest("Refresh token expired time");
             }
 
             var newAccessToken = tokenService.GenerateAccessToken(principal.Claims);
