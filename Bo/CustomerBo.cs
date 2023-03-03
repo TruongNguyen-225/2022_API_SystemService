@@ -61,7 +61,6 @@ namespace SystemServiceAPI.Bo
                              from service in serviceQueryable.Where(x => x.ServiceID == customer.ServiceID).DefaultIfEmpty()
                              from bank in bankQueryable.Where(x => x.BankID == customer.BankID).DefaultIfEmpty()
                              where customer.IsDelete == false
-                             //orderby customer.FullName ascending, customer.DateTimeAdd descending
                              select new CustomerResponse
                              {
                                  STT = 1,
@@ -146,11 +145,12 @@ namespace SystemServiceAPI.Bo
         public async Task<object> GetCustomerByServiceID(int serviceID)
         {
             var customerQueryable = GetQueryableViewCustomer();
-            var result = customerQueryable.Where(x => x.ServiceID == serviceID);
+            var queryable = customerQueryable.Where(x => x.ServiceID == serviceID);
 
-            if (result.Any())
+            if (queryable.Any())
             {
-                return await Task.FromResult(result.ToList());
+                var result = queryable.OrderByDescending(x => x.DateTimeUpdate ?? x.DateTimeAdd).ToList();
+                return await Task.FromResult(result);
             }
 
             return await Task.FromResult(default(object));

@@ -60,7 +60,7 @@ namespace SystemServiceAPICore3.Controllers
                     {
                         Token = accessToken,
                         RefreshToken = refreshToken,
-                        Expried = DateTime.Now.AddMinutes(1)
+                        Expried = DateTime.Now.AddHours(1)
                     });
                 }
 
@@ -117,7 +117,7 @@ namespace SystemServiceAPICore3.Controllers
             {
                 Token = newAccessToken,
                 RefreshToken = newRefreshToken,
-                Expried = DateTime.Now.AddMinutes(1)
+                Expried = DateTime.Now.AddHours(1)
             });
         }
     }
