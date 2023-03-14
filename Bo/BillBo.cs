@@ -253,7 +253,7 @@ namespace SystemServiceAPI.Bo
                 var monthlyTransactionRepository = GetRepository<MonthlyTransaction>();
                 var queryable = monthlyTransactionRepository
                     .FindBy(x => x.ServiceID == serviceID
-                                && listID.Contains(x.CustomerID.ToString())
+                                && listID.Contains(x.ID.ToString())
                                 && x.DateTimeAdd.Month == month
                                 && x.DateTimeAdd.Year == year);
 
