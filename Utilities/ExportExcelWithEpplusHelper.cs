@@ -275,16 +275,6 @@ namespace SystemServiceAPICore3.Utilities
                     if (rowDataTableSelected < maxRow)
                     {
                         DataRow dataTableRow = data.Rows[rowDataTableSelected];
-                        retailName = dataTableRow["RetailName"].ToString();
-
-                        if (activeSheet.Cells["B3"].Value.ToString() != retailName)
-                        {
-                            //set value B3
-                            activeSheet.Cells["B3"].Value = retailName;
-                            //set value B4
-                            activeSheet.Cells["B4"].Value = "Long Hưng, " + DateTime.Now.ToString("dd/MM/yyyy");
-                        }
-
                         Type type = dataTableRow[columnName].GetType();
 
                         if (type.Name != "DBNull")

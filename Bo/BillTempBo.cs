@@ -441,8 +441,12 @@ namespace SystemServiceAPI.Bo
                                     Money = temp.Money,
                                     Postage = temp.Postage,
                                     Total = temp.Total,
-                                    RetailName = retail.RetailName,
+                                    RetailName = String.Format("Chi nhánh: {0}", retail.DeputizeName),
+                                    Time = String.Format("Long Hưng, ...../{0}", DateTime.Now.ToString("MM/yyyy"))
                                 }).ToList();
+
+            string a = "nguyễn văn a (PB010101)";
+            var b = a.Split('(')[0];
 
             DataTable dataTable = Utility.ToDataTable(listBillTemp);
 
@@ -460,7 +464,7 @@ namespace SystemServiceAPI.Bo
             CellParams cellParams = new CellParams
             {
                 MaxColumn = 20,
-                StartColumn = 3,
+                StartColumn = 2,
                 StartRow = 3,
             };
 
