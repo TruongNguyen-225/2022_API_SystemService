@@ -256,9 +256,12 @@ namespace SystemServiceAPICore3.Utilities
             int startColumn = paramDefault.cellParam.StartColumn;
             int maxColumn = paramDefault.cellParam.MaxColumn;
             int nextStepColumn = 4;
-            var rowSelected = 0;
+            var rowDataTableSelected = 0;
             int maxRow = data.Rows.Count;
             string valueString = String.Empty;
+            string retailName = String.Empty;
+
+
 
             for (int i = startColumn; i < maxColumn; i++)
             {
@@ -267,16 +270,26 @@ namespace SystemServiceAPICore3.Utilities
                 if (valueCell != null && valueCell.ToString().Contains(ExportExcelConstants.TEXT_MARKER))
                 {
                     columnName = valueCell.ToString().Replace(ExportExcelConstants.TEXT_MARKER, String.Empty);
-                    rowSelected = isTopRow ? (nextStepColumn * (sheetActive + sheetActive)) + index : (nextStepColumn * ((sheetActive + sheetActive) + 1)) + index;
+                    rowDataTableSelected = isTopRow ? (nextStepColumn * (sheetActive + sheetActive)) + index : (nextStepColumn * ((sheetActive + sheetActive) + 1)) + index;
 
-                    if (rowSelected < maxRow)
+                    if (rowDataTableSelected < maxRow)
                     {
-                        DataRow row = data.Rows[rowSelected];
-                        Type type = row[columnName].GetType();
+                        DataRow dataTableRow = data.Rows[rowDataTableSelected];
+                        retailName = dataTableRow["RetailName"].ToString();
+
+                        if (activeSheet.Cells["B3"].Value.ToString() != retailName)
+                        {
+                            //set value B3
+                            activeSheet.Cells["B3"].Value = retailName;
+                            //set value B4
+                            activeSheet.Cells["B4"].Value = "Long Hưng, " + DateTime.Now.ToString("dd/MM/yyyy");
+                        }
+
+                        Type type = dataTableRow[columnName].GetType();
 
                         if (type.Name != "DBNull")
                         {
-                            valueString = DataAccess.CorrectValue(row[columnName], type).ToString();
+                            valueString = DataAccess.CorrectValue(dataTableRow[columnName], type).ToString();
 
                             int output;
                             bool success = int.TryParse(valueString, out output);
